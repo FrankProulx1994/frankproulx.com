@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculatrice de Réponse Impulsive</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px 10px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        header h2 {
+            margin: 10px 0 0;
+            font-size: 18px;
+            font-style: italic;
+        }
+        header h3 {
+            margin: 5px 0 0;
+            font-size: 16px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            margin: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .yes-button {
+            background-color: #28a745;
+            color: white;
+        }
+        .yes-button:hover {
+            background-color: #218838;
+        }
+        .no-button {
+            background-color: #dc3545;
+            color: white;
+        }
+        .no-button:hover {
+            background-color: #c82333;
+        }
+        .hidden {
+            display: none;
+        }
+        .positive-question {
+            color: #d9534f; /* Rouge pour le tableau positif */
+        }
+        .negative-question {
+            color: #000; /* Noir pour le tableau négatif */
+        }
+        .result-header {
+            font-weight: bold;
+            font-size: 20px;
+            margin-top: 20px;
+            color: #007BFF; /* Bleu pour les résultats */
+        }
+        .empty-space {
+            margin: 20px 0;
+        }
+        .result-content p {
+            margin: 8px 0;
+            font-size: 16px;
+            color: #0056b3; /* Texte des résultats en bleu */
+        }
+        .result-content .emphasis {
+            color: #d9534f;
+            font-weight: bold;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            margin: 10px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        ul li {
+            margin: 5px 0;
+        }
+        .precision {
+            font-style: italic;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Calculatrice de Réponse Impulsive</h1>
+    <h2>&nbsp;</h2>
+    <h3>Basée sur le modèle</h3>
+    <h3><strong>M.A.R.S</strong></h3>
+</header>
+
+<div class="container">
+    <div id="questions"></div>
+    <div id="results" class="hidden">
+        <div id="result-content" class="result-content"></div>
+        <div class="button-container">
+            <button class="button yes-button" onclick="restart()">Recommencer</button>
+            <button class="button no-button" onclick="window.print()">Imprimer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const elements = ['Situation', 'Relation', 'Autre(s)', 'Moi'];
+    const values = [8, 4, 2, 1];
+    let positiveOrder = [];
+    let negativeOrder = [];
+    let positiveImpacts = [];
+    let negativeImpacts = [];
+    let validationCount = 0;
+
+    const questionsDiv = document.getElementById('questions');
+    const resultsDiv = document.getElementById('results');
+    const resultContentDiv = document.getElementById('result-content');
+
+    function askImpact(type, order, callback) {
+        questionsDiv.innerHTML = '';
+        let index = 0;
+        let impacts = [];
+        function next() {
+            if (index >= order.length) {
+                callback(impacts);
+                return;
+            }
+            const element = order[index];
+            questionsDiv.innerHTML = `
+                <h3 class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
+                    ${type === 'Positif' 
+                        ? "Si tu choisis d'entreprendre cette action, décision ou ce choix," 
+                        : "Si tu choisis de ne pas entreprendre cette action, décision ou ce choix,"}
+                </h3>
+                <p class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
+                    L'impact sur <span class="emphasis">${element}</span> est-il ${type === 'Positif' ? 'positif' : 'négatif'} ?
+                </p>
+                <button class="button yes-button" onclick="recordImpact('o')">Oui</button>
+                <button class="button no-button" onclick="recordImpact('n')">Non</button>
+            `;
+        }
+        window.recordImpact = function (response) {
+            impacts.push(response === 'o');
+            index++;
+            next();
+        };
+        next();
+    }
+
+    function validateOrder(order, type, callback) {
+        questionsDiv.innerHTML = `
+            <h3 class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
+                ${type === 'Positif' 
+                    ? "Si tu choisis d'entreprendre cette action, décision ou ce choix," 
+                    : "Si tu choisis de ne pas entreprendre cette action, décision ou ce choix,"}
+            </h3>
+            <p class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
+                Ordre déterminé (${type}) : <span class="emphasis">${order.join(', ')}</span>
+            </p>
+            <p class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
+                L'ordre indiqué est-il correct ?
+            </p>
+            <button class="button yes-button" onclick="validationResponse(true)">Oui</button>
+            <button class="button no-button" onclick="validationResponse(false)">Non</button>
+        `;
+        window.validationResponse = function (valid) {
+            if (!valid) validationCount++;
+            callback(valid);
+        };
+    }
+
+    function sortElements(elements, type, callback) {
+        let order = [elements[0]];
+        let index = 1;
+        function next() {
+            if (index >= elements.length) {
+                validateOrder(order, type, (valid) => {
+                    if (valid) {
+                        callback(order);
+                    } else {
+                        sortElements(elements, type, callback);
+                    }
+                });
+                return;
+            }
+            const current = elements[index];
+            let position = 0;
+            function compare() {
+                if (position >= order.length) {
+                    order.push(current);
+                    index++;
+                    next();
+                    return;
+                }
+                const reference = order[position];
+                questionsDiv.innerHTML = `
+                    <h3 class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
+                        ${type === 'Positif' 
+                            ? "Si tu choisis d'entreprendre cette action, décision ou ce choix," 
+                            : "Si tu choisis de ne pas entreprendre cette action, décision ou ce choix,"}
+                    </h3>
+                    <p class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
+                        L'impact de <span class="emphasis">${current}</span> est-il plus important que celui de <span class="emphasis">${reference}</span> ?
+                    </p>
+                    <button class="button yes-button" onclick="compareResponse(true)">Oui</button>
+                    <button class="button no-button" onclick="compareResponse(false)">Non</button>
+                `;
+            }
+            window.compareResponse = function (higher) {
+                if (higher) {
+                    order.splice(position, 0, current);
+                    index++;
+                    next();
+                } else {
+                    position++;
+                    compare();
+                }
+            };
+            compare();
+        }
+        next();
+    }
+
+    function calculateResults() {
+        let total = 15;
+        let positiveValues = [];
+        let negativeValues = [];
+        let detailedPositive = [];
+        let detailedNegative = [];
+
+        positiveOrder.forEach((el, i) => {
+            if (positiveImpacts[i]) {
+                let value = values[i];
+                let percentage = Math.round((value / total) * 100);
+                positiveValues.push(value);
+                detailedPositive.push({ element: el, percentage });
+            }
+        });
+
+        negativeOrder.forEach((el, i) => {
+            if (negativeImpacts[i]) {
+                let value = values[i];
+                let percentage = Math.round((value / total) * 100);
+                negativeValues.push(value);
+                detailedNegative.push({ element: el, percentage });
+            }
+        });
+
+        detailedPositive.sort((a, b) => b.percentage - a.percentage);
+        detailedNegative.sort((a, b) => b.percentage - a.percentage);
+
+        let totalPositive = positiveValues.reduce((a, b) => a + b, 0);
+        let totalNegative = negativeValues.reduce((a, b) => a + b, 0);
+
+        let percentPositive = Math.round((totalPositive / total) * 100);
+        let percentNegative = Math.round((totalNegative / total) * 100);
+        let scorePositive = Math.round((totalPositive / total) * 10);
+        let scoreNegative = Math.round((totalNegative / total) * 10);
+        let globalScore = Math.round((scorePositive + scoreNegative) / 2);
+
+        let positiveDetailsHTML = detailedPositive.length > 0 
+            ? `<div class="precision">Précision :</div><ul>` + 
+              detailedPositive.map((item) => `<li>${item.element} : ${item.percentage}%</li>`).join('') + `</ul>`
+            : `<p>Aucune précision</p>`;
+        
+        let negativeDetailsHTML = detailedNegative.length > 0 
+            ? `<div class="precision">Précision :</div><ul>` + 
+              detailedNegative.map((item) => `<li>${item.element} : ${item.percentage}%</li>`).join('') + `</ul>`
+            : `<p>Aucune précision</p>`;
+
+        resultContentDiv.innerHTML = `
+            <div class="result-header">Résultat global :</div>
+            <p>Score global : ${globalScore} / 10 (${globalScore * 10}%)</p>
+            <div class="empty-space"></div>
+
+            <div class="result-header">Tableau positif :</div>
+            <p>Score positif sur : ${scorePositive} / 10 soit ${percentPositive}%</p>
+            ${positiveDetailsHTML}
+            <div class="empty-space"></div>
+            <p class="emphasis">À faire attention</p>
+            <div class="empty-space"></div>
+
+            <div class="result-header">Tableau négatif :</div>
+            <p>Score négatif sur : ${scoreNegative} / 10 soit ${percentNegative}%</p>
+            ${negativeDetailsHTML}
+            <div class="empty-space"></div>
+            <p class="emphasis">À faire attention</p>
+            <div class="empty-space"></div>
+
+            <p>Nombre de validations rejetées : ${validationCount}</p>
+        `;
+        questionsDiv.innerHTML = '';
+        resultsDiv.classList.remove('hidden');
+    }
+
+    function restart() {
+        positiveOrder = [];
+        negativeOrder = [];
+        positiveImpacts = [];
+        negativeImpacts = [];
+        validationCount = 0;
+        resultsDiv.classList.add('hidden');
+        start();
+    }
+
+    function start() {
+        sortElements(elements, 'Positif', (order) => {
+            positiveOrder = order;
+            askImpact('Positif', positiveOrder, (impacts) => {
+                positiveImpacts = impacts;
+                sortElements(elements, 'Négatif', (order) => {
+                    negativeOrder = order;
+                    askImpact('Négatif', negativeOrder, (impacts) => {
+                        negativeImpacts = impacts;
+                        calculateResults();
+                    });
+                });
+            });
+        });
+    }
+
+    start();
+</script>
+
+</body>
+</html>
