@@ -112,6 +112,33 @@
 </head>
 <body>
 
+<!-- Page de bienvenue -->
+<div id="welcome-screen" style="text-align:center; padding: 100px;">
+    <h1>Bienvenue sur la Calculatrice de Réponse Impulsive</h1>
+    <p>La calculatrice de réponse impulsive a été conçue comme un outil simple mais puissant pour vous aider à réfléchir avant d'agir. Elle vous invite à explorer une décision, une action ou un choix en vous appuyant sur le modèle M.A.R.S. :
+        Moi – Autres – Relation – Situation.
+        Ce modèle vous aide à ralentir votre processus décisionnel, à prendre du recul et à analyser la question que vous vous posez sous différents angles.</p>
+    <p>Indique ci-dessous l'action, la décision ou le choix que tu veux explorer :</p>
+    <input type="text" id="userDecision" placeholder="Exemple : Frapper Jeff" style="padding:10px; width:80%; max-width:400px; font-size:16px; margin-bottom:20px;">
+    <p>Clique sur le bouton ci-dessous pour commencer.</p>
+    <h1>Comment ça fonctionne ?</h1>
+    <p>Choisissez une décision, une action ou un choix que vous envisagez de faire.
+
+        Répondez aux questions qui suivent. Celles-ci vous proposent uniquement des réponses impulsives – c’est volontaire. L’objectif est de faire ressortir ce que vous pensez instinctivement dans l’instant.
+        
+        À la fin du questionnaire, des statistiques vous seront présentées. Elles vous permettront d’observer quelles dimensions (Moi, Autres, Relation, Situation) influencent le plus vos réponses impulsives.
+        
+        Si certaines validations sont rejetées, cela indique que vos réponses sont incohérentes ou confuses. Cela peut vouloir dire que vous êtes mélangé ou trop émotif pour prendre une décision claire. Dans ce cas, il est préférable de ne rien faire pour le moment et de refaire le test plus tard.
+        
+        Important :
+        Cette calculatrice ne donne pas de réponse magique ni de verdict final. Elle vous aide à mieux comprendre vos réflexes et vos émotions dans une situation donnée. Mieux se connaître, c’est déjà avancer vers une décision plus éclairée.</p>
+    <button class="button yes-button" onclick="launchCalculator()">Commencer</button>
+</div>
+
+<!-- Page principale masquée au départ -->
+<div id="main-content" class="hidden">
+
+
 <header>
     <h1>Calculatrice de Réponse Impulsive</h1>
     <h2>&nbsp;</h2>
@@ -133,6 +160,7 @@
 <script>
     const elements = ['Situation', 'Relation', 'Autre(s)', 'Moi'];
     const values = [8, 4, 2, 1];
+    let userDecision = "";
     let positiveOrder = [];
     let negativeOrder = [];
     let positiveImpacts = [];
@@ -153,7 +181,7 @@
                 return;
             }
             const element = order[index];
-            questionsDiv.innerHTML = `
+            questionsDiv.innerHTML = `<h2 style="color:#007BFF;">Choix / Décision / Action : ${userDecision}</h2>` + `
                 <h3 class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
                     ${type === 'Positif' 
                         ? "Si tu choisis d'entreprendre cette action, décision ou ce choix," 
@@ -175,7 +203,7 @@
     }
 
     function validateOrder(order, type, callback) {
-        questionsDiv.innerHTML = `
+        questionsDiv.innerHTML = `<h2 style="color:#007BFF;">Choix / Décision / Action : ${userDecision}</h2>` + `
             <h3 class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
                 ${type === 'Positif' 
                     ? "Si tu choisis d'entreprendre cette action, décision ou ce choix," 
@@ -220,7 +248,7 @@
                     return;
                 }
                 const reference = order[position];
-                questionsDiv.innerHTML = `
+                questionsDiv.innerHTML = `<h2 style="color:#007BFF;">Choix / Décision / Action : ${userDecision}</h2>` + `
                     <h3 class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
                         ${type === 'Positif' 
                             ? "Si tu choisis d'entreprendre cette action, décision ou ce choix," 
@@ -295,7 +323,12 @@
               detailedNegative.map((item) => `<li>${item.element} : ${item.percentage}%</li>`).join('') + `</ul>`
             : `<p>Aucune précision</p>`;
 
+        
         resultContentDiv.innerHTML = `
+            <div class="result-header">Choix / Décision / Action :</div>
+            <p style="font-weight:bold; font-size:18px; color:#333;">${userDecision}</p>
+            <div class="empty-space"></div>
+
             <div class="result-header">Résultat global :</div>
             <p>Score global : ${globalScore} / 10 (${globalScore * 10}%)</p>
             <div class="empty-space"></div>
@@ -327,7 +360,7 @@
         negativeImpacts = [];
         validationCount = 0;
         resultsDiv.classList.add('hidden');
-        start();
+        
     }
 
     function start() {
@@ -346,8 +379,17 @@
         });
     }
 
-    start();
+    
+
+    function launchCalculator() {
+        const input = document.getElementById("userDecision").value.trim();
+        userDecision = input || "(non précisé)";
+        document.getElementById("welcome-screen").style.display = "none";
+        document.getElementById("main-content").classList.remove("hidden");
+        start();
+    }
 </script>
 
+</div>
 </body>
 </html>
