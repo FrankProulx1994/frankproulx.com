@@ -109,6 +109,8 @@
             color: #555;
         }
     </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0/dist/chartjs-plugin-annotation.min.js"></script>
 </head>
 <body>
 
@@ -337,6 +339,7 @@
             <p>Score positif sur : ${scorePositive} / 10 soit ${percentPositive}%</p>
             ${positiveDetailsHTML}
             <div class="empty-space"></div>
+            <p class="emphasis">À faire attention</p>
             <div class="empty-space"></div>
 
             <div class="result-header">Tableau négatif :</div>
@@ -347,18 +350,149 @@
             <div class="empty-space"></div>
 
             <p>Nombre de validations rejetées : ${validationCount}</p>
-        `;
+        
+            <div class="result-header">Graphique des impacts positifs :</div>
+            <canvas id="positiveChart" width="400" height="300"></canvas>
+            <div class="empty-space"></div>
+
+            <div class="result-header">Graphique des impacts négatifs :</div>
+            <canvas id="negativeChart" width="400" height="300"></canvas>
+            <div class="empty-space"></div>
+`;
         questionsDiv.innerHTML = '';
         resultsDiv.classList.remove('hidden');
+        // Création des graphiques
+        const ctxPos = document.getElementById('positiveChart').getContext('2d');
+        const ctxNeg = document.getElementById('negativeChart').getContext('2d');
+
+        const positiveLabels = detailedPositive.map(item => item.element.charAt(0)); // M, A, R, S
+        const positiveData = detailedPositive.map(item => item.percentage);
+
+        const negativeLabels = detailedNegative.map(item => item.element.charAt(0)); // M, A, R, S
+        const negativeData = detailedNegative.map(item => item.percentage);
+
+        Chart.register(window['chartjs-plugin-annotation']);
+new Chart(ctxPos, {
+            type: 'bar',
+            data: {
+                labels: positiveLabels,
+                datasets: [{
+                    label: '% Impact positif',
+                    data: positiveData,
+                    backgroundColor: '#28a745'
+                }]
+            },
+            
+            options: {
+
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            faible: {
+                                type: 'box',
+                                yMin: 0,
+                                yMax: 7,
+                                backgroundColor: 'rgba(255, 0, 0, 0.1)'
+                            },
+                            normal: {
+                                type: 'box',
+                                yMin: 7,
+                                yMax: 13,
+                                backgroundColor: 'rgba(255, 165, 0, 0.1)'
+                            },
+                            important: {
+                                type: 'box',
+                                yMin: 13,
+                                yMax: 27,
+                                backgroundColor: 'rgba(255, 255, 0, 0.1)'
+                            },
+                            tresImportant: {
+                                type: 'box',
+                                yMin: 27,
+                                yMax: 53,
+                                backgroundColor: 'rgba(0, 128, 0, 0.1)'
+                            }
+                        }
+                    }
+                },
+
+                indexAxis: 'x',
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 53
+                    },
+                    x: {
+                        ticks: { font: { size: 14 } }
+                    }
+                }
+            }
+
+        });
+
+        Chart.register(window['chartjs-plugin-annotation']);
+new Chart(ctxNeg, {
+            type: 'bar',
+            data: {
+                labels: negativeLabels,
+                datasets: [{
+                    label: '% Impact négatif',
+                    data: negativeData,
+                    backgroundColor: '#dc3545'
+                }]
+            },
+            
+            options: {
+
+                plugins: {
+                    annotation: {
+                        annotations: {
+                            faible: {
+                                type: 'box',
+                                yMin: 0,
+                                yMax: 7,
+                                backgroundColor: 'rgba(255, 0, 0, 0.1)'
+                            },
+                            normal: {
+                                type: 'box',
+                                yMin: 7,
+                                yMax: 13,
+                                backgroundColor: 'rgba(255, 165, 0, 0.1)'
+                            },
+                            important: {
+                                type: 'box',
+                                yMin: 13,
+                                yMax: 27,
+                                backgroundColor: 'rgba(255, 255, 0, 0.1)'
+                            },
+                            tresImportant: {
+                                type: 'box',
+                                yMin: 27,
+                                yMax: 53,
+                                backgroundColor: 'rgba(0, 128, 0, 0.1)'
+                            }
+                        }
+                    }
+                },
+
+                indexAxis: 'x',
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 53
+                    },
+                    x: {
+                        ticks: { font: { size: 14 } }
+                    }
+                }
+            }
+
+        });
+
     }
 
     function restart() {
-        positiveOrder = [];
-        negativeOrder = [];
-        positiveImpacts = [];
-        negativeImpacts = [];
-        validationCount = 0;
-        resultsDiv.classList.add('hidden');
+    window.location.href = 'https://frankproulx.com';
         
     }
 
