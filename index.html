@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculatrice de Réponse Impulsive</title>
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Calculatrice de Réponse Impulsive</title>
+<style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -113,18 +114,17 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0/dist/chartjs-plugin-annotation.min.js"></script>
 </head>
 <body>
-
 <!-- Page de bienvenue -->
 <div id="welcome-screen" style="text-align:center; padding: 100px;">
-    <h1>Bienvenue sur la Calculatrice de Réponse Impulsive</h1>
-    <p>La calculatrice de réponse impulsive a été conçue comme un outil simple mais puissant pour vous aider à réfléchir avant d'agir. Elle vous invite à explorer une décision, une action ou un choix en vous appuyant sur le modèle M.A.R.S. :
+<h1>Bienvenue sur la Calculatrice de Réponse Impulsive</h1>
+<p>La calculatrice de réponse impulsive a été conçue comme un outil simple mais puissant pour vous aider à réfléchir avant d'agir. Elle vous invite à explorer une décision, une action ou un choix en vous appuyant sur le modèle M.A.R.S. :
         Moi – Autres – Relation – Situation.
         Ce modèle vous aide à ralentir votre processus décisionnel, à prendre du recul et à analyser la question que vous vous posez sous différents angles.</p>
-    <p>Indique ci-dessous l'action, la décision ou le choix que tu veux explorer :</p>
-    <input type="text" id="userDecision" placeholder="Exemple : Frapper Jeff" style="padding:10px; width:80%; max-width:400px; font-size:16px; margin-bottom:20px;">
-    <p>Clique sur le bouton ci-dessous pour commencer.</p>
-    <h1>Comment ça fonctionne ?</h1>
-    <p>Choisissez une décision, une action ou un choix que vous envisagez de faire.
+<p>Indique ci-dessous l'action, la décision ou le choix que tu veux explorer :</p>
+<input id="userDecision" placeholder="Exemple : Frapper Jeff" style="padding:10px; width:80%; max-width:400px; font-size:16px; margin-bottom:20px;" type="text"/>
+<p>Clique sur le bouton ci-dessous pour commencer.</p>
+<h1>Comment ça fonctionne ?</h1>
+<p>Choisissez une décision, une action ou un choix que vous envisagez de faire.
 
         Répondez aux questions qui suivent. Celles-ci vous proposent uniquement des réponses impulsives – c’est volontaire. L’objectif est de faire ressortir ce que vous pensez instinctivement dans l’instant.
         
@@ -134,31 +134,26 @@
         
         Important :
         Cette calculatrice ne donne pas de réponse magique ni de verdict final. Elle vous aide à mieux comprendre vos réflexes et vos émotions dans une situation donnée. Mieux se connaître, c’est déjà avancer vers une décision plus éclairée.</p>
-    <button class="button yes-button" onclick="launchCalculator()">Commencer</button>
+<button class="button yes-button" onclick="launchCalculator()">Commencer</button>
 </div>
-
 <!-- Page principale masquée au départ -->
-<div id="main-content" class="hidden">
-
-
+<div class="hidden" id="main-content">
 <header>
-    <h1>Calculatrice de Réponse Impulsive</h1>
-    <h2>&nbsp;</h2>
-    <h3>Basée sur le modèle</h3>
-    <h3><strong>M.A.R.S</strong></h3>
+<h1>Calculatrice de Réponse Impulsive</h1>
+<h2> </h2>
+<h3>Basée sur le modèle</h3>
+<h3><strong>M.A.R.S</strong></h3>
 </header>
-
 <div class="container">
-    <div id="questions"></div>
-    <div id="results" class="hidden">
-        <div id="result-content" class="result-content"></div>
-        <div class="button-container">
-            <button class="button yes-button" onclick="restart()">Recommencer</button>
-            <button class="button no-button" onclick="window.print()">Imprimer</button>
-        </div>
-    </div>
+<div id="questions"></div>
+<div class="hidden" id="results">
+<div class="result-content" id="result-content"></div>
+<div class="button-container">
+<button class="button yes-button" onclick="restart()">Recommencer</button>
+<button class="button no-button" onclick="window.print()">Imprimer</button>
 </div>
-
+</div>
+</div>
 <script>
     const elements = ['Situation', 'Relation', 'Autre(s)', 'Moi'];
     const values = [8, 4, 2, 1];
@@ -332,17 +327,18 @@
             <div class="empty-space"></div>
 
             <div class="result-header">Résultat global :</div>
+<p class='precision'>Note finale représentant à quel point tu crois que cette décision est bonne.</p>
             <p>Score global : ${globalScore} / 10 (${globalScore * 10}%)</p>
             <div class="empty-space"></div>
 
             <div class="result-header">Tableau positif :</div>
+<p class='precision'>Facteurs qui font pencher la balance en faveur de faire cette action, ce choix ou cette décision.</p>
             <p>Score positif sur : ${scorePositive} / 10 soit ${percentPositive}%</p>
             ${positiveDetailsHTML}
             <div class="empty-space"></div>
-            <p class="emphasis">À faire attention</p>
-            <div class="empty-space"></div>
 
             <div class="result-header">Tableau négatif :</div>
+<p class='precision'>Facteurs qui font pencher la balance en faveur de ne pas faire cette action, ce choix ou cette décision.</p>
             <p>Score négatif sur : ${scoreNegative} / 10 soit ${percentNegative}%</p>
             ${negativeDetailsHTML}
             <div class="empty-space"></div>
@@ -350,12 +346,17 @@
             <div class="empty-space"></div>
 
             <p>Nombre de validations rejetées : ${validationCount}</p>
+<div class='result-header'>⚠️ Nombre de validations rejetées :</div>
+<p>Indique un niveau de confusion ou d’ambivalence dans tes réponses.<br>Si ce nombre est supérieur à 0, il est préférable d’attendre avant de prendre une décision et de refaire le test plus tard, dans un état plus calme ou plus clair.</p>
+
         
             <div class="result-header">Graphique des impacts positifs :</div>
+<p class='precision'>Montre ce qui affaiblit ou désavantage la balance si tu choisis de faire cette action, ce choix ou cette décision. Basé uniquement sur les éléments jugés négatifs (réponses &laquo; NON &raquo;).</p>
             <canvas id="positiveChart" width="400" height="300"></canvas>
             <div class="empty-space"></div>
 
             <div class="result-header">Graphique des impacts négatifs :</div>
+<p class='precision'>Montre ce qui affaiblit ou désavantage la balance si tu choisis de ne pas faire cette action, ce choix ou cette décision. Basé uniquement sur les éléments jugés négatifs (réponses &laquo; NON &raquo;).</p>
             <canvas id="negativeChart" width="400" height="300"></canvas>
             <div class="empty-space"></div>
 `;
@@ -365,11 +366,19 @@
         const ctxPos = document.getElementById('positiveChart').getContext('2d');
         const ctxNeg = document.getElementById('negativeChart').getContext('2d');
 
-        const positiveLabels = detailedPositive.map(item => item.element.charAt(0)); // M, A, R, S
-        const positiveData = detailedPositive.map(item => item.percentage);
+        const positiveLabels = positiveOrder
+            .map((el, i) => !positiveImpacts[i] ? el.charAt(0) : null)
+            .filter(Boolean);
+        const positiveData = positiveOrder
+            .map((el, i) => !positiveImpacts[i] ? Math.round((values[i] / total) * 100) : null)
+            .filter(val => val !== null);
 
-        const negativeLabels = detailedNegative.map(item => item.element.charAt(0)); // M, A, R, S
-        const negativeData = detailedNegative.map(item => item.percentage);
+        const negativeLabels = negativeOrder
+            .map((el, i) => !negativeImpacts[i] ? el.charAt(0) : null)
+            .filter(Boolean);
+        const negativeData = negativeOrder
+            .map((el, i) => !negativeImpacts[i] ? Math.round((values[i] / total) * 100) : null)
+            .filter(val => val !== null);
 
         Chart.register(window['chartjs-plugin-annotation']);
 new Chart(ctxPos, {
@@ -522,7 +531,6 @@ new Chart(ctxNeg, {
         start();
     }
 </script>
-
 </div>
 </body>
 </html>
