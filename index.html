@@ -175,13 +175,6 @@
 <div style="text-align:center; margin-top: 20px;">
 <button class="button yes-button" onclick="toggleDefinitions()">Afficher / Masquer les définitions M.A.R.S.</button>
 </div>
-<div id="mars-definitions" style="display:none; margin-top:20px; padding:10px; background:#eef; border-radius:8px;">
-<h3>Définitions du modèle M.A.R.S. :</h3>
-<p><strong>Moi (M):</strong> Cette partie se concentre sur l'individu lui-même, ses émotions, ses pensées, ses besoins et ses peurs. Un article sur le site du Gouvernement du Québec explique que les personnes atteintes de TPL ont souvent une image négative d'elles-mêmes et peuvent avoir des difficultés à réguler leurs émotions.</p>
-<p><strong>Autre (A):</strong> Cette section examine les autres personnes impliquées dans la situation, y compris leurs émotions, leurs motivations et leur façon de percevoir les choses. Un site d'information sur le TPL souligne que les relations interpersonnelles sont souvent difficiles pour les personnes atteintes de TPL.</p>
-<p><strong>Relation (R):</strong> Ici, l'accent est mis sur la nature de la relation entre "Moi" et "Autre". Cela inclut la qualité de la communication, les attentes, les schémas de comportement, et l'impact des émotions de chacun sur la relation.</p>
-<p><strong>Situation (S):</strong> Cette partie examine le contexte dans lequel la relation se déroule. Cela peut inclure des facteurs externes tels que le stress, les changements dans l'environnement ou des événements spécifiques qui peuvent influencer les émotions et les comportements des personnes impliquées.</p>
-</div>
 <div id="definition-box" style="background:#eef;padding:15px;margin-top:20px;border-radius:8px;display:none;font-size:0.95em;"></div>
 <div class="hidden" id="results">
 <div class="result-content" id="result-content"></div>
@@ -590,10 +583,10 @@ function updateDefinitionFromText(text) {
     return;
   }
   const defs = {
-    "Moi": "💭 <strong>Moi (M):</strong> Se concentre sur toi-même : émotions, pensées, besoins et peurs.",
-    "Autre": "👥 <strong>Autre (A):</strong> Porte sur les autres : émotions, motivations et perceptions.",
-    "Relation": "🔗 <strong>Relation (R):</strong> Nature de la relation entre Moi et Autre : communication, attentes, comportements.",
-    "Situation": "🌍 <strong>Situation (S):</strong> Contexte de la relation : environnement, stress ou événements."
+    "Moi": "💭 <strong>Moi (M):</strong> Cette dimension concerne l’individu lui-même. Elle inclut ses émotions, ses pensées, ses besoins, ses désirs, ses valeurs ainsi que ses craintes. C’est l’espace intérieur où l’on prend conscience de son état personnel et de la façon dont il influence ses réactions.",
+    "Autre": "👥 <strong>Autre (A):</strong> Cette dimension s’intéresse aux personnes impliquées dans la situation. Elle tient compte de leurs émotions, de leurs intentions, de leurs comportements et de leur façon de percevoir les choses. L’objectif est de comprendre l’impact que l’autre peut avoir sur soi, et inversement.",
+    "Relation": "🔗 <strong>Relation (R):</strong> Cette dimension met l’accent sur la dynamique entre « Moi » et « Autre ». Elle comprend la qualité de la communication, la confiance mutuelle, les attentes réciproques, les habitudes relationnelles et la manière dont les émotions de chacun façonnent l’interaction.",
+    "Situation": "🌍 <strong>Situation (S):</strong> Cette dimension examine le contexte dans lequel la relation se déroule. Elle prend en compte les éléments extérieurs comme l’environnement, les contraintes, les événements, le stress ou tout autre facteur pouvant influencer les comportements et les émotions des personnes impliquées."
   };
   let found = Object.entries(defs).filter(([key]) => text.includes(key)).map(([, v]) => v).join("<br><br>");
   if (found) {
@@ -614,3 +607,4 @@ function toggleDefinitions() {
 }
 </script></body>
 </html>
+
