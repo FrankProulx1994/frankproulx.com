@@ -109,7 +109,33 @@
             font-style: italic;
             color: #555;
         }
-    </style>
+    
+@media screen and (max-width: 600px) {
+    body {
+        font-size: 16px;
+        padding: 10px;
+    }
+    .container {
+        padding: 10px;
+        margin: 10px;
+        box-shadow: none;
+        border-radius: 0;
+    }
+    input[type="text"] {
+        width: 100% !important;
+        font-size: 16px;
+    }
+    .button {
+        width: 90%;
+        margin: 10px auto;
+        font-size: 16px;
+    }
+    canvas {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+}
+</style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0/dist/chartjs-plugin-annotation.min.js"></script>
 </head>
@@ -146,8 +172,20 @@
 </header>
 <div class="container">
 <div id="questions"></div>
+<div style="text-align:center; margin-top: 20px;">
+<button class="button yes-button" onclick="toggleDefinitions()">Afficher / Masquer les définitions M.A.R.S.</button>
+</div>
+<div id="mars-definitions" style="display:none; margin-top:20px; padding:10px; background:#eef; border-radius:8px;">
+<h3>Définitions du modèle M.A.R.S. :</h3>
+<p><strong>Moi (M):</strong> Cette partie se concentre sur l'individu lui-même, ses émotions, ses pensées, ses besoins et ses peurs. Un article sur le site du Gouvernement du Québec explique que les personnes atteintes de TPL ont souvent une image négative d'elles-mêmes et peuvent avoir des difficultés à réguler leurs émotions.</p>
+<p><strong>Autre (A):</strong> Cette section examine les autres personnes impliquées dans la situation, y compris leurs émotions, leurs motivations et leur façon de percevoir les choses. Un site d'information sur le TPL souligne que les relations interpersonnelles sont souvent difficiles pour les personnes atteintes de TPL.</p>
+<p><strong>Relation (R):</strong> Ici, l'accent est mis sur la nature de la relation entre "Moi" et "Autre". Cela inclut la qualité de la communication, les attentes, les schémas de comportement, et l'impact des émotions de chacun sur la relation.</p>
+<p><strong>Situation (S):</strong> Cette partie examine le contexte dans lequel la relation se déroule. Cela peut inclure des facteurs externes tels que le stress, les changements dans l'environnement ou des événements spécifiques qui peuvent influencer les émotions et les comportements des personnes impliquées.</p>
+</div>
+<div id="definition-box" style="background:#eef;padding:15px;margin-top:20px;border-radius:8px;display:none;font-size:0.95em;"></div>
 <div class="hidden" id="results">
 <div class="result-content" id="result-content"></div>
+</div>
 <div class="button-container">
 <button class="button yes-button" onclick="restart()">Recommencer</button>
 <button class="button no-button" onclick="window.print()">Imprimer</button>
@@ -178,7 +216,7 @@
                 return;
             }
             const element = order[index];
-            questionsDiv.innerHTML = `<h2 style="color:#007BFF;">Choix / Décision / Action : ${userDecision}</h2>` + `
+            let htmlContent = `<h2 style="color:#007BFF;">Choix / Décision / Action : ${userDecision}</h2>` + `
                 <h3 class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
                     ${type === 'Positif' 
                         ? "Si tu choisis d'entreprendre cette action, décision ou ce choix," 
@@ -190,6 +228,8 @@
                 <button class="button yes-button" onclick="recordImpact('o')">Oui</button>
                 <button class="button no-button" onclick="recordImpact('n')">Non</button>
             `;
+        questionsDiv.innerHTML = htmlContent;
+        updateDefinitionFromText(htmlContent);
         }
         window.recordImpact = function (response) {
             impacts.push(response === 'o');
@@ -200,7 +240,7 @@
     }
 
     function validateOrder(order, type, callback) {
-        questionsDiv.innerHTML = `<h2 style="color:#007BFF;">Choix / Décision / Action : ${userDecision}</h2>` + `
+        let htmlContent = `<h2 style="color:#007BFF;">Choix / Décision / Action : ${userDecision}</h2>` + `
             <h3 class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
                 ${type === 'Positif' 
                     ? "Si tu choisis d'entreprendre cette action, décision ou ce choix," 
@@ -215,6 +255,8 @@
             <button class="button yes-button" onclick="validationResponse(true)">Oui</button>
             <button class="button no-button" onclick="validationResponse(false)">Non</button>
         `;
+        questionsDiv.innerHTML = htmlContent;
+        updateDefinitionFromText(htmlContent);
         window.validationResponse = function (valid) {
             if (!valid) validationCount++;
             callback(valid);
@@ -245,7 +287,7 @@
                     return;
                 }
                 const reference = order[position];
-                questionsDiv.innerHTML = `<h2 style="color:#007BFF;">Choix / Décision / Action : ${userDecision}</h2>` + `
+                let htmlContent = `<h2 style="color:#007BFF;">Choix / Décision / Action : ${userDecision}</h2>` + `
                     <h3 class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
                         ${type === 'Positif' 
                             ? "Si tu choisis d'entreprendre cette action, décision ou ce choix," 
@@ -257,6 +299,8 @@
                     <button class="button yes-button" onclick="compareResponse(true)">Oui</button>
                     <button class="button no-button" onclick="compareResponse(false)">Non</button>
                 `;
+        questionsDiv.innerHTML = htmlContent;
+        updateDefinitionFromText(htmlContent);
             }
             window.compareResponse = function (higher) {
                 if (higher) {
@@ -361,7 +405,12 @@
             <div class="empty-space"></div>
 `;
         questionsDiv.innerHTML = '';
-        resultsDiv.classList.remove('hidden');
+        const defBox = document.getElementById('definition-box');
+if (defBox) {
+  defBox.innerHTML = '';
+  defBox.style.display = 'none';
+}
+resultsDiv.classList.remove('hidden');
         // Création des graphiques
         const ctxPos = document.getElementById('positiveChart').getContext('2d');
         const ctxNeg = document.getElementById('negativeChart').getContext('2d');
@@ -532,5 +581,36 @@ new Chart(ctxNeg, {
     }
 </script>
 </div>
-</body>
+<script>
+function updateDefinitionFromText(text) {
+  const resultsVisible = !document.getElementById("results").classList.contains("hidden");
+  const box = document.getElementById("definition-box");
+  if (resultsVisible) {
+    if (box) { box.innerHTML = ""; box.style.display = "none"; }
+    return;
+  }
+  const defs = {
+    "Moi": "💭 <strong>Moi (M):</strong> Se concentre sur toi-même : émotions, pensées, besoins et peurs.",
+    "Autre": "👥 <strong>Autre (A):</strong> Porte sur les autres : émotions, motivations et perceptions.",
+    "Relation": "🔗 <strong>Relation (R):</strong> Nature de la relation entre Moi et Autre : communication, attentes, comportements.",
+    "Situation": "🌍 <strong>Situation (S):</strong> Contexte de la relation : environnement, stress ou événements."
+  };
+  let found = Object.entries(defs).filter(([key]) => text.includes(key)).map(([, v]) => v).join("<br><br>");
+  if (found) {
+    box.innerHTML = found;
+    box.style.display = "block";
+  } else {
+    box.innerHTML = "";
+    box.style.display = "none";
+  }
+}
+</script>
+<script>
+function toggleDefinitions() {
+    const defBlock = document.getElementById("mars-definitions");
+    if (defBlock) {
+        defBlock.style.display = defBlock.style.display === "none" ? "block" : "none";
+    }
+}
+</script></body>
 </html>
