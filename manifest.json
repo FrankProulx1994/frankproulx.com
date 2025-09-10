@@ -1,0 +1,13 @@
+{
+  "name": "frankproulx",
+  "short_name": "FrankProulx",
+  "start_url": "/?source=twa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "icons": [
+    { "src": "/icons/icon-A.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-A.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
