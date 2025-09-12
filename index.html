@@ -9,36 +9,228 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#111111">
+  <meta name="theme-color" content="#0b0b0b">
   <title data-i18n="title">Calculatrice de Réponse Impulsive</title>
-  <style>
-    body{font-family:Arial,sans-serif;margin:0;padding:0;background:#f4f4f9;color:#333;line-height:1.6}
-    header{background:#4CAF50;color:#fff;padding:20px 10px;text-align:center}
-    header h1{margin:0;font-size:28px}
-    header h2{margin:10px 0 0;font-size:18px;font-style:italic}
-    header h3{margin:5px 0 0;font-size:16px}
-    .container{max-width:800px;margin:20px auto;padding:20px;background:#fff;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
-    .button{padding:10px 20px;font-size:16px;cursor:pointer;border:none;margin:10px;border-radius:5px;transition:background-color .3s ease}
-    .yes-button{background:#28a745;color:#fff}.yes-button:hover{background:#218838}
-    .no-button{background:#dc3545;color:#fff}.no-button:hover{background:#c82333}
-    .hidden{display:none}
-    .positive-question{color:#d9534f}
-    .negative-question{color:#000}
-    .result-header{font-weight:bold;font-size:20px;margin-top:20px;color:#007BFF}
-    .empty-space{margin:20px 0}
-    .result-content p{margin:8px 0;font-size:16px;color:#0056b3}
-    .result-content .emphasis{color:#d9534f;font-weight:bold}
-    .button-container{text-align:center;margin-top:20px}
-    button{margin:10px}
-    ul{list-style:none;padding:0}ul li{margin:5px 0}
-    .precision{font-style:italic;color:#555}
-    .langbar{position:sticky;top:0;z-index:5;background:#111;color:#fff;padding:8px 12px;display:flex;gap:8px;justify-content:flex-end;align-items:center}
-    .langbar button{margin:0 4px;padding:6px 10px;border-radius:6px;border:1px solid #333;background:#222;color:#fff;cursor:pointer}
-    .langbar button.active{background:#4CAF50;border-color:#3a9a40}
-    @media screen and (max-width:600px){body{font-size:16px;padding:10px}.container{padding:10px;margin:10px;box-shadow:none;border-radius:0}input[type="text"]{width:100% !important;font-size:16px}.button{width:90%;margin:10px auto;font-size:16px}canvas{max-width:100% !important;height:auto !important}}
-  </style>
+
+  <!-- Chart libs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0/dist/chartjs-plugin-annotation.min.js"></script>
+
+  <style>
+    /* ===== Palette ===== */
+    :root{
+      --bg0:#0b0b0b; /* fond principal */
+      --bg1:#131313; /* cartes */
+      --bg2:#1b1b1b; /* éléments secondaires */
+      --fg0:#ffffff; /* texte primaire */
+      --fg1:#e8e8e8; /* texte secondaire */
+      --muted:#a9a9a9; /* texte doux */
+      --red:#ff3434;
+      --red2:#e61919;
+      --green:#23d14d;
+      --green2:#18b33f;
+      --blue:#4aa3ff;
+      --border:#292929;
+      --shadow: 0 10px 28px rgba(0,0,0,.55);
+    }
+
+    /* ===== Base ===== */
+    html,body{height:100%}
+    body{
+      font-family: Arial, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin:0; padding:0;
+      background: var(--bg0);
+      color: var(--fg1);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* background visual WITHOUT blocking clicks */
+    body::before, body::after{
+      content:"";
+      position:fixed; inset:0;
+      pointer-events:none; /* important: never block clicks */
+      z-index:-1;
+    }
+    body::before{
+      background:
+        radial-gradient(900px 600px at 90% -10%, rgba(255,52,52,.24), transparent 60%),
+        radial-gradient(900px 600px at -10% 110%, rgba(255,0,0,.18), transparent 60%),
+        linear-gradient(135deg, #080808 0%, #0f0f0f 40%, #121212 60%, #0c0c0c 100%);
+      animation: bgDrift 16s ease-in-out infinite alternate;
+      filter: saturate(1.05);
+    }
+    body::after{
+      background-image: linear-gradient(135deg, rgba(255,255,255,.04) 0 1px, transparent 1px 20px);
+      background-size: 20px 20px;
+      opacity:.35;
+      animation: scan 3.5s linear infinite;
+      mix-blend-mode: overlay;
+    }
+    @keyframes bgDrift{
+      0%{ transform: translate3d(0,0,0); }
+      100%{ transform: translate3d(0,-12px,0); }
+    }
+    @keyframes scan{
+      0%{ background-position: 0 0; }
+      100%{ background-position: 40px 40px; }
+    }
+
+    /* ===== Top language bar ===== */
+    .langbar{
+      position:sticky; top:0; z-index:5;
+      background: rgba(15,15,15,.9);
+      backdrop-filter: blur(6px);
+      color: var(--fg1);
+      padding: 8px 12px;
+      display:flex; gap:8px; justify-content:flex-end; align-items:center;
+      border-bottom: 2px solid var(--red);
+      box-shadow: var(--shadow);
+    }
+    .langbar button{
+      margin:0 4px; padding:6px 10px;
+      border-radius:6px; border:1px solid var(--red);
+      background:#1c1c1c; color:#fff; cursor:pointer;
+      transition: transform .15s, box-shadow .15s, background .15s, border-color .15s;
+    }
+    .langbar button:hover{ transform: translateY(-1px); box-shadow: 0 0 10px rgba(255,52,52,.3); }
+    .langbar button.active{ background: var(--red); border-color: var(--red2); }
+
+    /* ===== Header ===== */
+    header{
+      background: linear-gradient(135deg, #121212, #171717);
+      color: var(--red);
+      padding: 20px 10px;
+      text-align:center;
+      border-bottom: 3px solid var(--red);
+      box-shadow: var(--shadow);
+      text-transform: uppercase;
+      letter-spacing:.4px;
+    }
+    header h1{ margin:0; font-size:28px; color:var(--red); }
+    header h2{ margin:10px 0 0; font-size:18px; font-style:italic; color:#cfcfcf; }
+    header h3{ margin:5px 0 0; font-size:16px; color:#ff5a5a; }
+
+    /* ===== Cards / Containers ===== */
+    .container{
+      max-width: 860px;
+      margin: 20px auto;
+      padding: 20px;
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    /* ===== Buttons ===== */
+    .button{
+      padding: 12px 22px;
+      font-size: 16px;
+      cursor:pointer;
+      border:none;
+      margin:10px;
+      border-radius:10px;
+      font-weight:800;
+      letter-spacing:.25px;
+      transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .button:active{ transform: translateY(1px) scale(.99); }
+
+    .yes-button{
+      background: var(--green);
+      color:#071407;
+      text-shadow: 0 1px 0 rgba(255,255,255,.2);
+      box-shadow: 0 8px 18px rgba(35,209,77,.25);
+    }
+    .yes-button:hover{ background: var(--green2); }
+
+    .no-button{
+      background: var(--red);
+      color:#fff;
+      box-shadow: 0 8px 18px rgba(255,52,52,.25);
+    }
+    .no-button:hover{ background: var(--red2); }
+
+    .hidden{ display:none }
+
+    .positive-question{ color: var(--green); font-weight: 900; text-shadow: 0 0 10px rgba(35,209,77,.25); }
+    .negative-question{ color: var(--red); font-weight: 900; text-shadow: 0 0 10px rgba(255,52,52,.25); }
+
+    .result-header{
+      font-weight:900;
+      font-size:20px;
+      margin-top:20px;
+      color: var(--blue);
+      border-bottom: 2px solid var(--blue);
+      padding-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    .empty-space{ margin:20px 0 }
+    .result-content p{ margin:8px 0; font-size:16px; color:#e6e6e6 }
+    .result-content .emphasis{ color: var(--red); font-weight: 900 }
+    .button-container{ text-align:center; margin-top:20px }
+
+    ul{ list-style:none; padding:0 }
+    ul li{ margin:5px 0; color:#cfcfcf }
+    .precision{ font-style:italic; color: var(--muted) }
+
+    /* Welcome card */
+    #welcome-screen{
+      background: rgba(22,22,22,.92);
+      color: var(--fg1);
+      border: 1px solid var(--border);
+      width: min(920px, 92vw);
+      margin: 60px auto;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    input[type="text"]{
+      background:#0f0f0f;
+      color:#fff;
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px 12px;
+      outline:none;
+      transition: border .15s, box-shadow .15s;
+    }
+    input[type="text"]:focus{
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(255,52,52,.15);
+    }
+
+    /* Charts */
+    canvas{ background:#0e0e0e; border-radius:10px }
+
+    /* APK link style */
+    .apk-link{
+      text-decoration:none;
+      display:inline-block;
+      background: #202020;
+      color:#fff;
+      border:1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 16px;
+      transition: transform .15s, box-shadow .15s, background .15s, border-color .15s;
+    }
+    .apk-link:hover{
+      background:#262626; border-color:#333; transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(255,255,255,.06);
+    }
+
+    @media screen and (max-width:600px){
+      body{ font-size:16px; padding:10px }
+      .container{ padding:12px; margin:12px; box-shadow:none; border-radius: 10px }
+      input[type="text"]{ width:100% !important; font-size:16px }
+      .button{ width:90%; margin:10px auto; font-size:16px }
+      canvas{ max-width:100% !important; height:auto !important }
+      #welcome-screen{ margin:30px auto; padding: 10px }
+    }
+  </style>
 </head>
 <body>
   <div class="langbar">
@@ -57,13 +249,10 @@
     <input id="userDecision" type="text" data-i18n-placeholder="decisionPlaceholder" placeholder="Exemple : Frapper Jeff" style="padding:10px; width:80%; max-width:400px; font-size:16px; margin-bottom:20px;"/>
     <p data-i18n="welcomeClick">Clique sur le bouton ci-dessous pour commencer.</p>
     <button class="button yes-button" data-i18n="start" onclick="launchCalculator()">Commencer</button>
-  <!-- Bouton de téléchargement de l'application Android -->
-  <div style="margin-top:20px;">
-    <a href="app-release-signed.apk" download class="button no-button">
-      📱 Télécharger l'application Android (.apk)
-    </a>
-  </div>
-
+    <!-- Bouton de téléchargement de l'application Android -->
+    <div style="margin-top:20px;">
+      <a href="app-release-signed.apk" download class="apk-link">📱 Télécharger l'application Android (.apk)</a>
+    </div>
   </div>
 
   <!-- Page principale masquée / Main content -->
@@ -76,7 +265,7 @@
     </header>
     <div class="container">
       <div id="questions"></div>
-      <div id="definition-box" style="background:#eef;padding:15px;margin-top:20px;border-radius:8px;display:none;font-size:.95em;"></div>
+      <div id="definition-box" style="background:#13131a;padding:15px;margin-top:20px;border-radius:10px;display:none;font-size:.95em;border:1px solid var(--border);"></div>
       <div class="hidden" id="results">
         <div class="result-content" id="result-content"></div>
       </div>
@@ -206,8 +395,8 @@ function setLang(lang){
   document.documentElement.lang = lang;
   var fr = document.getElementById('btn-fr');
   var en = document.getElementById('btn-en');
-  if(fr) fr.className = (lang==='fr'?'active':'');
-  if(en) en.className = (lang==='en'?'active':'');
+  if(fr) fr.className = (lang==='fr'?'active':''); else if(fr!==null){}
+  if(en) en.className = (lang==='en'?'active':''); else if(en!==null){}
   var dict = I18N[lang];
   document.title = dict.title;
   var i18n = document.querySelectorAll('[data-i18n]');
@@ -222,12 +411,11 @@ function setLang(lang){
     var k = elp.getAttribute('data-i18n-placeholder');
     if (dict[k]) elp.setAttribute('placeholder', dict[k]);
   }
-  // refresh definition box if visible
   var defBox = document.getElementById('definition-box');
   if(defBox && defBox.style.display==='block'){ updateDefinitionFromText(defBox.innerHTML); }
 }
 
-// === Core (reprend la logique originale avec onclick inline) ===
+// === Core (conserve les mêmes handlers inline) ===
 function askImpact(kind, order, callback){
   questionsDiv.innerHTML = '';
   var index = 0;
@@ -236,7 +424,7 @@ function askImpact(kind, order, callback){
     if(index >= order.length){ callback(impacts); return; }
     var el = order[index];
     var html = ""
-      + "<h2 style='color:#007BFF;'>" + t('dacTitle') + " : " + userDecision + "</h2>"
+      + "<h2 style='color:#4aa3ff;'>" + t('dacTitle') + " : " + userDecision + "</h2>"
       + "<h3 class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>"
       + (kind==='Positive' ? t('ifDo') : t('ifDont')) + "</h3>"
       + "<p class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>"
@@ -256,7 +444,7 @@ function askImpact(kind, order, callback){
 
 function validateOrder(order, kind, callback){
   var html = ""
-    + "<h2 style='color:#007BFF;'>" + t('dacTitle') + " : " + userDecision + "</h2>"
+    + "<h2 style='color:#4aa3ff;'>" + t('dacTitle') + " : " + userDecision + "</h2>"
     + "<h3 class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>"
     + (kind==='Positive' ? t('ifDo') : t('ifDont')) + "</h3>"
     + "<p class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>"
@@ -264,7 +452,7 @@ function validateOrder(order, kind, callback){
     + "<p class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>"
     + t('orderCorrect') + "</p>"
     + "<button class='button yes-button' onclick='validationResponse(true)'>" + t('yes') + "</button>"
-    + "<button class='button no-button'  onclick='validationResponse(false)'>" + t('no') + "</button>";
+    + "<button class='button no-button' onclick='validationResponse(false)'>" + t('no') + "</button>";
   questionsDiv.innerHTML = html;
   updateDefinitionFromText(html);
   window.validationResponse = function(valid){
@@ -298,7 +486,7 @@ function sortElements(els, kind, callback){
         ? "L'impact de <span class='emphasis'>" + current + "</span> est-il plus important que celui de <span class='emphasis'>" + reference + "</span> ?"
         : "Is the impact of <span class='emphasis'>" + current + "</span> greater than <span class='emphasis'>" + reference + "</span>?";
       var html = ""
-        + "<h2 style='color:#007BFF;'>" + t('dacTitle') + " : " + userDecision + "</h2>"
+        + "<h2 style='color:#4aa3ff;'>" + t('dacTitle') + " : " + userDecision + "</h2>"
         + "<h3 class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>"
         + (kind==='Positive' ? t('ifDo') : t('ifDont')) + "</h3>"
         + "<p class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>" + question + "</p>"
@@ -354,7 +542,7 @@ function calculateResults(){
 
   resultContentDiv.innerHTML = ""
     + "<div class='result-header'>"+t('dacTitle')+" :</div>"
-    + "<p style='font-weight:bold; font-size:18px; color:#333;'>"+userDecision+"</p>"
+    + "<p style='font-weight:bold; font-size:18px; color:#e6e6e6;'>"+userDecision+"</p>"
     + "<div class='empty-space'></div>"
     + "<div class='result-header'>"+t('overallResult')+"</div>"
     + "<p class='precision'>"+t('overallResultDesc')+"</p>"
@@ -400,7 +588,7 @@ function calculateResults(){
   Chart.register(window['chartjs-plugin-annotation']);
   new Chart(ctxPos, {
     type:'bar',
-    data:{ labels:posLabels, datasets:[{ label:(LANG==='fr'?'% Impact positif':'% Positive impact'), data:posData, backgroundColor:'#28a745' }]},
+    data:{ labels:posLabels, datasets:[{ label:(LANG==='fr'?'% Impact positif':'% Positive impact'), data:posData, backgroundColor:'#23d14d' }]},
     options:{ plugins:{ annotation:{ annotations:{ faible:{type:'box',yMin:0,yMax:7,backgroundColor:'rgba(255,0,0,.1)'},
                                             normal:{type:'box',yMin:7,yMax:13,backgroundColor:'rgba(255,165,0,.1)'},
                                             important:{type:'box',yMin:13,yMax:27,backgroundColor:'rgba(255,255,0,.1)'},
@@ -411,7 +599,7 @@ function calculateResults(){
   Chart.register(window['chartjs-plugin-annotation']);
   new Chart(ctxNeg, {
     type:'bar',
-    data:{ labels:negLabels, datasets:[{ label:(LANG==='fr'?'% Impact négatif':'% Negative impact'), data:negData, backgroundColor:'#dc3545' }]},
+    data:{ labels:negLabels, datasets:[{ label:(LANG==='fr'?'% Impact négatif':'% Negative impact'), data:negData, backgroundColor:'#ff3434' }]},
     options:{ plugins:{ annotation:{ annotations:{ faible:{type:'box',yMin:0,yMax:7,backgroundColor:'rgba(255,0,0,.1)'},
                                             normal:{type:'box',yMin:7,yMax:13,backgroundColor:'rgba(255,165,0,.1)'},
                                             important:{type:'box',yMin:13,yMax:27,backgroundColor:'rgba(255,255,0,.1)'},
@@ -423,7 +611,6 @@ function calculateResults(){
 function restart(){ window.location.href = 'https://frankproulx.com'; }
 
 function start(){
-  // Use language-specific element names
   var els = I18N[LANG].elements.slice(0);
   sortElements(els, 'Positive', function(order){
     positiveOrder = order;
@@ -479,4 +666,3 @@ setLang('fr');
 </script>
 </body>
 </html>
-
