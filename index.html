@@ -1,616 +1,474 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
-<script>
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js');
-}
-</script>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#111111">
-<title>Calculatrice de Réponse Impulsive</title>
-<style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f9;
-            color: #333;
-            line-height: 1.6;
-        }
-        header {
-            background-color: #4CAF50;
-            color: white;
-            padding: 20px 10px;
-            text-align: center;
-        }
-        header h1 {
-            margin: 0;
-            font-size: 28px;
-        }
-        header h2 {
-            margin: 10px 0 0;
-            font-size: 18px;
-            font-style: italic;
-        }
-        header h3 {
-            margin: 5px 0 0;
-            font-size: 16px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            margin: 10px;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        .yes-button {
-            background-color: #28a745;
-            color: white;
-        }
-        .yes-button:hover {
-            background-color: #218838;
-        }
-        .no-button {
-            background-color: #dc3545;
-            color: white;
-        }
-        .no-button:hover {
-            background-color: #c82333;
-        }
-        .hidden {
-            display: none;
-        }
-        .positive-question {
-            color: #d9534f; /* Rouge pour le tableau positif */
-        }
-        .negative-question {
-            color: #000; /* Noir pour le tableau négatif */
-        }
-        .result-header {
-            font-weight: bold;
-            font-size: 20px;
-            margin-top: 20px;
-            color: #007BFF; /* Bleu pour les résultats */
-        }
-        .empty-space {
-            margin: 20px 0;
-        }
-        .result-content p {
-            margin: 8px 0;
-            font-size: 16px;
-            color: #0056b3; /* Texte des résultats en bleu */
-        }
-        .result-content .emphasis {
-            color: #d9534f;
-            font-weight: bold;
-        }
-        .button-container {
-            text-align: center;
-            margin-top: 20px;
-        }
-        button {
-            margin: 10px;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-        ul li {
-            margin: 5px 0;
-        }
-        .precision {
-            font-style: italic;
-            color: #555;
-        }
-    
-@media screen and (max-width: 600px) {
-    body {
-        font-size: 16px;
-        padding: 10px;
-    }
-    .container {
-        padding: 10px;
-        margin: 10px;
-        box-shadow: none;
-        border-radius: 0;
-    }
-    input[type="text"] {
-        width: 100% !important;
-        font-size: 16px;
-    }
-    .button {
-        width: 90%;
-        margin: 10px auto;
-        font-size: 16px;
-    }
-    canvas {
-        max-width: 100% !important;
-        height: auto !important;
-    }
-}
-</style>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0/dist/chartjs-plugin-annotation.min.js"></script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    try { navigator.serviceWorker.register('/sw.js'); } catch(e) {}
+  }
+  </script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#111111">
+  <title data-i18n="title">Calculatrice de Réponse Impulsive</title>
+  <style>
+    body{font-family:Arial,sans-serif;margin:0;padding:0;background:#f4f4f9;color:#333;line-height:1.6}
+    header{background:#4CAF50;color:#fff;padding:20px 10px;text-align:center}
+    header h1{margin:0;font-size:28px}
+    header h2{margin:10px 0 0;font-size:18px;font-style:italic}
+    header h3{margin:5px 0 0;font-size:16px}
+    .container{max-width:800px;margin:20px auto;padding:20px;background:#fff;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+    .button{padding:10px 20px;font-size:16px;cursor:pointer;border:none;margin:10px;border-radius:5px;transition:background-color .3s ease}
+    .yes-button{background:#28a745;color:#fff}.yes-button:hover{background:#218838}
+    .no-button{background:#dc3545;color:#fff}.no-button:hover{background:#c82333}
+    .hidden{display:none}
+    .positive-question{color:#d9534f}
+    .negative-question{color:#000}
+    .result-header{font-weight:bold;font-size:20px;margin-top:20px;color:#007BFF}
+    .empty-space{margin:20px 0}
+    .result-content p{margin:8px 0;font-size:16px;color:#0056b3}
+    .result-content .emphasis{color:#d9534f;font-weight:bold}
+    .button-container{text-align:center;margin-top:20px}
+    button{margin:10px}
+    ul{list-style:none;padding:0}ul li{margin:5px 0}
+    .precision{font-style:italic;color:#555}
+    .langbar{position:sticky;top:0;z-index:5;background:#111;color:#fff;padding:8px 12px;display:flex;gap:8px;justify-content:flex-end;align-items:center}
+    .langbar button{margin:0 4px;padding:6px 10px;border-radius:6px;border:1px solid #333;background:#222;color:#fff;cursor:pointer}
+    .langbar button.active{background:#4CAF50;border-color:#3a9a40}
+    @media screen and (max-width:600px){body{font-size:16px;padding:10px}.container{padding:10px;margin:10px;box-shadow:none;border-radius:0}input[type="text"]{width:100% !important;font-size:16px}.button{width:90%;margin:10px auto;font-size:16px}canvas{max-width:100% !important;height:auto !important}}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0/dist/chartjs-plugin-annotation.min.js"></script>
 </head>
 <body>
-<!-- Page de bienvenue -->
-<div id="welcome-screen" style="text-align:center; padding: 100px;">
-<h1>Bienvenue sur la Calculatrice de Réponse Impulsive</h1>
-<p>La calculatrice de réponse impulsive a été conçue comme un outil simple mais puissant pour vous aider à réfléchir avant d'agir. Elle vous invite à explorer une décision, une action ou un choix en vous appuyant sur le modèle M.A.R.S. :
-        Moi – Autres – Relation – Situation.
-        Ce modèle vous aide à ralentir votre processus décisionnel, à prendre du recul et à analyser la question que vous vous posez sous différents angles.</p>
-<p>Indique ci-dessous l'action, la décision ou le choix que tu veux explorer :</p>
-<input id="userDecision" placeholder="Exemple : Frapper Jeff" style="padding:10px; width:80%; max-width:400px; font-size:16px; margin-bottom:20px;" type="text"/>
-<p>Clique sur le bouton ci-dessous pour commencer.</p>
-<h1>Comment ça fonctionne ?</h1>
-<p>Choisissez une décision, une action ou un choix que vous envisagez de faire.
+  <div class="langbar">
+    <span>Lang / Langue:</span>
+    <button id="btn-fr" class="active" type="button" onclick="setLang('fr')">FR</button>
+    <button id="btn-en" type="button" onclick="setLang('en')">EN</button>
+  </div>
 
-        Répondez aux questions qui suivent. Celles-ci vous proposent uniquement des réponses impulsives – c’est volontaire. L’objectif est de faire ressortir ce que vous pensez instinctivement dans l’instant.
-        
-        À la fin du questionnaire, des statistiques vous seront présentées. Elles vous permettront d’observer quelles dimensions (Moi, Autres, Relation, Situation) influencent le plus vos réponses impulsives.
-        
-        Si certaines validations sont rejetées, cela indique que vos réponses sont incohérentes ou confuses. Cela peut vouloir dire que vous êtes mélangé ou trop émotif pour prendre une décision claire. Dans ce cas, il est préférable de ne rien faire pour le moment et de refaire le test plus tard.
-        
-        Important :
-        Cette calculatrice ne donne pas de réponse magique ni de verdict final. Elle vous aide à mieux comprendre vos réflexes et vos émotions dans une situation donnée. Mieux se connaître, c’est déjà avancer vers une décision plus éclairée.</p>
-<button class="button yes-button" onclick="launchCalculator()">Commencer</button>
-</div>
-<!-- Page principale masquée au départ -->
-<div class="hidden" id="main-content">
-<header>
-<h1>Calculatrice de Réponse Impulsive</h1>
-<h2> </h2>
-<h3>Basée sur le modèle</h3>
-<h3><strong>M.A.R.S</strong></h3>
-</header>
-<div class="container">
-<div id="questions"></div>
-<div id="definition-box" style="background:#eef;padding:15px;margin-top:20px;border-radius:8px;display:none;font-size:0.95em;"></div>
-<div class="hidden" id="results">
-<div class="result-content" id="result-content"></div>
-</div>
-<div class="button-container">
-<button class="button yes-button" onclick="restart()">Recommencer</button>
-<button class="button no-button" onclick="window.print()">Imprimer</button>
-</div>
-</div>
-</div>
+  <!-- Page de bienvenue / Welcome screen -->
+  <div id="welcome-screen" style="text-align:center; padding:100px;">
+    <h1 data-i18n="welcomeTitle">Bienvenue sur la Calculatrice de Réponse Impulsive</h1>
+    <p data-i18n="welcomeIntro">
+      La calculatrice de réponse impulsive vous aide à réfléchir avant d'agir à l'aide du modèle M.A.R.S. : Moi – Autres – Relation – Situation.
+    </p>
+    <p data-i18n="welcomePrompt">Indique l'action, la décision ou le choix que tu veux explorer :</p>
+    <input id="userDecision" type="text" data-i18n-placeholder="decisionPlaceholder" placeholder="Exemple : Frapper Jeff" style="padding:10px; width:80%; max-width:400px; font-size:16px; margin-bottom:20px;"/>
+    <p data-i18n="welcomeClick">Clique sur le bouton ci-dessous pour commencer.</p>
+    <button class="button yes-button" data-i18n="start" onclick="launchCalculator()">Commencer</button>
+  </div>
+
+  <!-- Page principale masquée / Main content -->
+  <div class="hidden" id="main-content">
+    <header>
+      <h1 data-i18n="title">Calculatrice de Réponse Impulsive</h1>
+      <h2>&nbsp;</h2>
+      <h3 data-i18n="basedOn">Basée sur le modèle</h3>
+      <h3><strong>M.A.R.S</strong></h3>
+    </header>
+    <div class="container">
+      <div id="questions"></div>
+      <div id="definition-box" style="background:#eef;padding:15px;margin-top:20px;border-radius:8px;display:none;font-size:.95em;"></div>
+      <div class="hidden" id="results">
+        <div class="result-content" id="result-content"></div>
+      </div>
+      <div class="button-container">
+        <button class="button yes-button" data-i18n="restart" onclick="restart()">Recommencer</button>
+        <button class="button no-button"  data-i18n="print" onclick="window.print()">Imprimer</button>
+      </div>
+    </div>
+  </div>
+
 <script>
-    const elements = ['Situation', 'Relation', 'Autre(s)', 'Moi'];
-    const values = [8, 4, 2, 1];
-    let userDecision = "";
-    let positiveOrder = [];
-    let negativeOrder = [];
-    let positiveImpacts = [];
-    let negativeImpacts = [];
-    let validationCount = 0;
-
-    const questionsDiv = document.getElementById('questions');
-    const resultsDiv = document.getElementById('results');
-    const resultContentDiv = document.getElementById('result-content');
-
-    function askImpact(type, order, callback) {
-        questionsDiv.innerHTML = '';
-        let index = 0;
-        let impacts = [];
-        function next() {
-            if (index >= order.length) {
-                callback(impacts);
-                return;
-            }
-            const element = order[index];
-            let htmlContent = `<h2 style="color:#007BFF;">Choix / Décision / Action : ${userDecision}</h2>` + `
-                <h3 class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
-                    ${type === 'Positif' 
-                        ? "Si tu choisis d'entreprendre cette action, décision ou ce choix," 
-                        : "Si tu choisis de ne pas entreprendre cette action, décision ou ce choix,"}
-                </h3>
-                <p class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
-                    L'impact sur <span class="emphasis">${element}</span> est-il ${type === 'Positif' ? 'positif' : 'négatif'} ?
-                </p>
-                <button class="button yes-button" onclick="recordImpact('o')">Oui</button>
-                <button class="button no-button" onclick="recordImpact('n')">Non</button>
-            `;
-        questionsDiv.innerHTML = htmlContent;
-        updateDefinitionFromText(htmlContent);
-        }
-        window.recordImpact = function (response) {
-            impacts.push(response === 'o');
-            index++;
-            next();
-        };
-        next();
+// ===== i18n dictionnaire =====
+var I18N = {
+  fr: {
+    title:'Calculatrice de Réponse Impulsive',
+    welcomeTitle:'Bienvenue sur la Calculatrice de Réponse Impulsive',
+    welcomeIntro:"La calculatrice de réponse impulsive vous aide à réfléchir avant d'agir à l'aide du modèle M.A.R.S. : Moi – Autres – Relation – Situation.",
+    welcomePrompt:"Indique l'action, la décision ou le choix que tu veux explorer :",
+    decisionPlaceholder:'Exemple : Frapper Jeff',
+    welcomeClick:'Clique sur le bouton ci-dessous pour commencer.',
+    start:'Commencer',
+    basedOn:'Basée sur le modèle',
+    restart:'Recommencer',
+    print:'Imprimer',
+    dacTitle:'Choix / Décision / Action',
+    ifDo:"Si tu choisis d'entreprendre cette action, décision ou ce choix,",
+    ifDont:"Si tu choisis de ne pas entreprendre cette action, décision ou ce choix,",
+    isImpactOn: function(el, kind){ return "L'impact sur <span class='emphasis'>"+el+"</span> est-il " + (kind==='Positive'?'positif':'négatif') + " ?"; },
+    yes:'Oui', no:'Non',
+    orderIs: function(kind,order){ return "Ordre déterminé ("+(kind==='Positive'?'Positif':'Négatif')+") : <span class='emphasis'>"+order.join(', ')+"</span>"; },
+    orderCorrect:"L'ordre indiqué est-il correct ?",
+    overallResult:'Résultat global :',
+    overallResultDesc:'Note finale représentant à quel point tu crois que cette décision est bonne.',
+    globalScore:function(s){ return "Score global : "+s+" / 10 ("+(s*10)+"%)"; },
+    posTable:'Tableau positif :',
+    posDesc:"Facteurs qui font pencher la balance en faveur de faire cette action, ce choix ou cette décision.",
+    posScore:function(s,p){ return "Score positif sur : "+s+" / 10 soit "+p+"%"; },
+    negTable:'Tableau négatif :',
+    negDesc:"Facteurs qui font pencher la balance en faveur de ne pas faire cette action, ce choix ou cette décision.",
+    negScore:function(s,p){ return "Score négatif sur : "+s+" / 10 soit "+p+"%"; },
+    details:'Précision :',
+    none:'Aucune précision',
+    caution:'À faire attention',
+    rejTitle:'⚠️ Nombre de validations rejetées :',
+    rejDesc:"Indique un niveau de confusion ou d’ambivalence dans tes réponses. S'il est supérieur à 0, attends avant de décider et refais le test plus tard.",
+    posChart:'Graphique des impacts positifs :',
+    posChartDesc:'Montre ce qui affaiblit la balance si tu choisis de faire. Basé sur les éléments jugés négatifs ("NON").',
+    negChart:'Graphique des impacts négatifs :',
+    negChartDesc:'Montre ce qui affaiblit la balance si tu choisis de ne pas faire. Basé sur les éléments jugés négatifs ("NON").',
+    elements:['Situation','Relation','Autres','Moi'],
+    defs:{
+      'Moi':"💭 <strong>Moi (M):</strong> État intérieur : émotions, pensées, besoins, désirs, valeurs, craintes — et leur influence sur tes réactions.",
+      'Autres':"👥 <strong>Autres (A):</strong> Personnes impliquées : émotions, intentions, comportements, perceptions, et leur impact réciproque.",
+      'Relation':"🔗 <strong>Relation (R):</strong> Dynamique Moi–Autres : qualité de la communication, confiance, attentes, habitudes, et rôle des émotions.",
+      'Situation':"🌍 <strong>Situation (S):</strong> Contexte : environnement, contraintes, événements, stress et autres facteurs qui influencent comportements et émotions."
     }
-
-    function validateOrder(order, type, callback) {
-        let htmlContent = `<h2 style="color:#007BFF;">Choix / Décision / Action : ${userDecision}</h2>` + `
-            <h3 class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
-                ${type === 'Positif' 
-                    ? "Si tu choisis d'entreprendre cette action, décision ou ce choix," 
-                    : "Si tu choisis de ne pas entreprendre cette action, décision ou ce choix,"}
-            </h3>
-            <p class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
-                Ordre déterminé (${type}) : <span class="emphasis">${order.join(', ')}</span>
-            </p>
-            <p class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
-                L'ordre indiqué est-il correct ?
-            </p>
-            <button class="button yes-button" onclick="validationResponse(true)">Oui</button>
-            <button class="button no-button" onclick="validationResponse(false)">Non</button>
-        `;
-        questionsDiv.innerHTML = htmlContent;
-        updateDefinitionFromText(htmlContent);
-        window.validationResponse = function (valid) {
-            if (!valid) validationCount++;
-            callback(valid);
-        };
+  },
+  en: {
+    title:'Impulsive Response Calculator',
+    welcomeTitle:'Welcome to the Impulsive Response Calculator',
+    welcomeIntro:'This calculator helps you pause before acting using the M.A.R.S. model: Self – Others – Relationship – Situation.',
+    welcomePrompt:'Describe the action, decision, or choice you want to explore:',
+    decisionPlaceholder:'Example: Punch Jeff',
+    welcomeClick:'Click the button below to begin.',
+    start:'Start',
+    basedOn:'Based on the model',
+    restart:'Restart',
+    print:'Print',
+    dacTitle:'Decision / Action / Choice',
+    ifDo:'If you choose to take this action/decision/choice,',
+    ifDont:'If you choose NOT to take this action/decision/choice,',
+    isImpactOn:function(el,kind){ return "Is the impact on <span class='emphasis'>"+el+"</span> " + (kind==='Positive'?'positive':'negative') + "?"; },
+    yes:'Yes', no:'No',
+    orderIs:function(kind,order){ return "Determined order ("+kind+"): <span class='emphasis'>"+order.join(', ')+"</span>"; },
+    orderCorrect:'Is this order correct?',
+    overallResult:'Overall Result:',
+    overallResultDesc:'Final score representing how much you believe this decision is good.',
+    globalScore:function(s){ return "Global score: "+s+" / 10 ("+(s*10)+"%)"; },
+    posTable:'Positive table:',
+    posDesc:'Factors pushing toward doing this action/choice/decision.',
+    posScore:function(s,p){ return "Positive score: "+s+" / 10 i.e. "+p+"%"; },
+    negTable:'Negative table:',
+    negDesc:'Factors pushing toward NOT doing this action/choice/decision.',
+    negScore:function(s,p){ return "Negative score: "+s+" / 10 i.e. "+p+"%"; },
+    details:'Details:',
+    none:'No details',
+    caution:'Be careful',
+    rejTitle:'⚠️ Rejected validations:',
+    rejDesc:'Indicates confusion or ambivalence. If above 0, wait before deciding and try the test again later.',
+    posChart:'Positive impacts chart:',
+    posChartDesc:'Shows what weakens the balance if you choose to DO. Based on elements marked negative ("No").',
+    negChart:'Negative impacts chart:',
+    negChartDesc:'Shows what weakens the balance if you choose to NOT DO. Based on elements marked negative ("No").',
+    elements:['Situation','Relationship','Others','Self'],
+    defs:{
+      'Self':"💭 <strong>Self (S):</strong> Inner state: emotions, thoughts, needs, desires, values, fears — and how they shape reactions.",
+      'Others':"👥 <strong>Others (O):</strong> People involved: emotions, intentions, behaviours, perceptions, and reciprocal impact.",
+      'Relationship':"🔗 <strong>Relationship (R):</strong> Self–Others dynamic: communication quality, trust, expectations, habits, and role of emotions.",
+      'Situation':"🌍 <strong>Situation (Si):</strong> Context: environment, constraints, events, stressors, and other influencing factors."
     }
+  }
+};
 
-    function sortElements(elements, type, callback) {
-        let order = [elements[0]];
-        let index = 1;
-        function next() {
-            if (index >= elements.length) {
-                validateOrder(order, type, (valid) => {
-                    if (valid) {
-                        callback(order);
-                    } else {
-                        sortElements(elements, type, callback);
-                    }
-                });
-                return;
-            }
-            const current = elements[index];
-            let position = 0;
-            function compare() {
-                if (position >= order.length) {
-                    order.push(current);
-                    index++;
-                    next();
-                    return;
-                }
-                const reference = order[position];
-                let htmlContent = `<h2 style="color:#007BFF;">Choix / Décision / Action : ${userDecision}</h2>` + `
-                    <h3 class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
-                        ${type === 'Positif' 
-                            ? "Si tu choisis d'entreprendre cette action, décision ou ce choix," 
-                            : "Si tu choisis de ne pas entreprendre cette action, décision ou ce choix,"}
-                    </h3>
-                    <p class="${type === 'Positif' ? 'positive-question' : 'negative-question'}">
-                        L'impact de <span class="emphasis">${current}</span> est-il plus important que celui de <span class="emphasis">${reference}</span> ?
-                    </p>
-                    <button class="button yes-button" onclick="compareResponse(true)">Oui</button>
-                    <button class="button no-button" onclick="compareResponse(false)">Non</button>
-                `;
-        questionsDiv.innerHTML = htmlContent;
-        updateDefinitionFromText(htmlContent);
-            }
-            window.compareResponse = function (higher) {
-                if (higher) {
-                    order.splice(position, 0, current);
-                    index++;
-                    next();
-                } else {
-                    position++;
-                    compare();
-                }
-            };
-            compare();
-        }
-        next();
-    }
+var LANG = 'fr';
+var elementsWeights = [8,4,2,1]; // keep original weighting
+var userDecision = "";
+var positiveOrder = [];
+var negativeOrder = [];
+var positiveImpacts = [];
+var negativeImpacts = [];
+var validationCount = 0;
 
-    function calculateResults() {
-        let total = 15;
-        let positiveValues = [];
-        let negativeValues = [];
-        let detailedPositive = [];
-        let detailedNegative = [];
+var questionsDiv, resultsDiv, resultContentDiv;
 
-        positiveOrder.forEach((el, i) => {
-            if (positiveImpacts[i]) {
-                let value = values[i];
-                let percentage = Math.round((value / total) * 100);
-                positiveValues.push(value);
-                detailedPositive.push({ element: el, percentage });
-            }
-        });
-
-        negativeOrder.forEach((el, i) => {
-            if (negativeImpacts[i]) {
-                let value = values[i];
-                let percentage = Math.round((value / total) * 100);
-                negativeValues.push(value);
-                detailedNegative.push({ element: el, percentage });
-            }
-        });
-
-        detailedPositive.sort((a, b) => b.percentage - a.percentage);
-        detailedNegative.sort((a, b) => b.percentage - a.percentage);
-
-        let totalPositive = positiveValues.reduce((a, b) => a + b, 0);
-        let totalNegative = negativeValues.reduce((a, b) => a + b, 0);
-
-        let percentPositive = Math.round((totalPositive / total) * 100);
-        let percentNegative = Math.round((totalNegative / total) * 100);
-        let scorePositive = Math.round((totalPositive / total) * 10);
-        let scoreNegative = Math.round((totalNegative / total) * 10);
-        let globalScore = Math.round((scorePositive + scoreNegative) / 2);
-
-        let positiveDetailsHTML = detailedPositive.length > 0 
-            ? `<div class="precision">Précision :</div><ul>` + 
-              detailedPositive.map((item) => `<li>${item.element} : ${item.percentage}%</li>`).join('') + `</ul>`
-            : `<p>Aucune précision</p>`;
-        
-        let negativeDetailsHTML = detailedNegative.length > 0 
-            ? `<div class="precision">Précision :</div><ul>` + 
-              detailedNegative.map((item) => `<li>${item.element} : ${item.percentage}%</li>`).join('') + `</ul>`
-            : `<p>Aucune précision</p>`;
-
-        
-        resultContentDiv.innerHTML = `
-            <div class="result-header">Choix / Décision / Action :</div>
-            <p style="font-weight:bold; font-size:18px; color:#333;">${userDecision}</p>
-            <div class="empty-space"></div>
-
-            <div class="result-header">Résultat global :</div>
-<p class='precision'>Note finale représentant à quel point tu crois que cette décision est bonne.</p>
-            <p>Score global : ${globalScore} / 10 (${globalScore * 10}%)</p>
-            <div class="empty-space"></div>
-
-            <div class="result-header">Tableau positif :</div>
-<p class='precision'>Facteurs qui font pencher la balance en faveur de faire cette action, ce choix ou cette décision.</p>
-            <p>Score positif sur : ${scorePositive} / 10 soit ${percentPositive}%</p>
-            ${positiveDetailsHTML}
-            <div class="empty-space"></div>
-
-            <div class="result-header">Tableau négatif :</div>
-<p class='precision'>Facteurs qui font pencher la balance en faveur de ne pas faire cette action, ce choix ou cette décision.</p>
-            <p>Score négatif sur : ${scoreNegative} / 10 soit ${percentNegative}%</p>
-            ${negativeDetailsHTML}
-            <div class="empty-space"></div>
-            <p class="emphasis">À faire attention</p>
-            <div class="empty-space"></div>
-
-            <p>Nombre de validations rejetées : ${validationCount}</p>
-<div class='result-header'>⚠️ Nombre de validations rejetées :</div>
-<p>Indique un niveau de confusion ou d’ambivalence dans tes réponses.<br>Si ce nombre est supérieur à 0, il est préférable d’attendre avant de prendre une décision et de refaire le test plus tard, dans un état plus calme ou plus clair.</p>
-
-        
-            <div class="result-header">Graphique des impacts positifs :</div>
-<p class='precision'>Montre ce qui affaiblit ou désavantage la balance si tu choisis de faire cette action, ce choix ou cette décision. Basé uniquement sur les éléments jugés négatifs (réponses &laquo; NON &raquo;).</p>
-            <canvas id="positiveChart" width="400" height="300"></canvas>
-            <div class="empty-space"></div>
-
-            <div class="result-header">Graphique des impacts négatifs :</div>
-<p class='precision'>Montre ce qui affaiblit ou désavantage la balance si tu choisis de ne pas faire cette action, ce choix ou cette décision. Basé uniquement sur les éléments jugés négatifs (réponses &laquo; NON &raquo;).</p>
-            <canvas id="negativeChart" width="400" height="300"></canvas>
-            <div class="empty-space"></div>
-`;
-        questionsDiv.innerHTML = '';
-        const defBox = document.getElementById('definition-box');
-if (defBox) {
-  defBox.innerHTML = '';
-  defBox.style.display = 'none';
+function t(key){
+  var dict = I18N[LANG];
+  var v = dict[key];
+  if (typeof v === 'function') {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return v.apply(null, args);
+  }
+  return v;
 }
-resultsDiv.classList.remove('hidden');
-        // Création des graphiques
-        const ctxPos = document.getElementById('positiveChart').getContext('2d');
-        const ctxNeg = document.getElementById('negativeChart').getContext('2d');
 
-        const positiveLabels = positiveOrder
-            .map((el, i) => !positiveImpacts[i] ? el.charAt(0) : null)
-            .filter(Boolean);
-        const positiveData = positiveOrder
-            .map((el, i) => !positiveImpacts[i] ? Math.round((values[i] / total) * 100) : null)
-            .filter(val => val !== null);
+function setLang(lang){
+  LANG = lang;
+  document.documentElement.lang = lang;
+  var fr = document.getElementById('btn-fr');
+  var en = document.getElementById('btn-en');
+  if(fr) fr.className = (lang==='fr'?'active':'');
+  if(en) en.className = (lang==='en'?'active':'');
+  var dict = I18N[lang];
+  document.title = dict.title;
+  var i18n = document.querySelectorAll('[data-i18n]');
+  for (var i=0;i<i18n.length;i++){
+    var el = i18n[i];
+    var key = el.getAttribute('data-i18n');
+    if (dict[key]) el.innerHTML = dict[key];
+  }
+  var ph = document.querySelectorAll('[data-i18n-placeholder]');
+  for (var j=0;j<ph.length;j++){
+    var elp = ph[j];
+    var k = elp.getAttribute('data-i18n-placeholder');
+    if (dict[k]) elp.setAttribute('placeholder', dict[k]);
+  }
+  // refresh definition box if visible
+  var defBox = document.getElementById('definition-box');
+  if(defBox && defBox.style.display==='block'){ updateDefinitionFromText(defBox.innerHTML); }
+}
 
-        const negativeLabels = negativeOrder
-            .map((el, i) => !negativeImpacts[i] ? el.charAt(0) : null)
-            .filter(Boolean);
-        const negativeData = negativeOrder
-            .map((el, i) => !negativeImpacts[i] ? Math.round((values[i] / total) * 100) : null)
-            .filter(val => val !== null);
+// === Core (reprend la logique originale avec onclick inline) ===
+function askImpact(kind, order, callback){
+  questionsDiv.innerHTML = '';
+  var index = 0;
+  var impacts = [];
+  function next(){
+    if(index >= order.length){ callback(impacts); return; }
+    var el = order[index];
+    var html = ""
+      + "<h2 style='color:#007BFF;'>" + t('dacTitle') + " : " + userDecision + "</h2>"
+      + "<h3 class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>"
+      + (kind==='Positive' ? t('ifDo') : t('ifDont')) + "</h3>"
+      + "<p class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>"
+      + t('isImpactOn', el, kind) + "</p>"
+      + "<button class='button yes-button' onclick=\"recordImpact('y')\">" + t('yes') + "</button>"
+      + "<button class='button no-button'  onclick=\"recordImpact('n')\">" + t('no') + "</button>";
+    questionsDiv.innerHTML = html;
+    updateDefinitionFromText(html);
+  }
+  window.recordImpact = function(resp){
+    impacts.push(resp==='y');
+    index++;
+    next();
+  };
+  next();
+}
 
-        Chart.register(window['chartjs-plugin-annotation']);
-new Chart(ctxPos, {
-            type: 'bar',
-            data: {
-                labels: positiveLabels,
-                datasets: [{
-                    label: '% Impact positif',
-                    data: positiveData,
-                    backgroundColor: '#28a745'
-                }]
-            },
-            
-            options: {
+function validateOrder(order, kind, callback){
+  var html = ""
+    + "<h2 style='color:#007BFF;'>" + t('dacTitle') + " : " + userDecision + "</h2>"
+    + "<h3 class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>"
+    + (kind==='Positive' ? t('ifDo') : t('ifDont')) + "</h3>"
+    + "<p class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>"
+    + t('orderIs', kind, order) + "</p>"
+    + "<p class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>"
+    + t('orderCorrect') + "</p>"
+    + "<button class='button yes-button' onclick='validationResponse(true)'>" + t('yes') + "</button>"
+    + "<button class='button no-button'  onclick='validationResponse(false)'>" + t('no') + "</button>";
+  questionsDiv.innerHTML = html;
+  updateDefinitionFromText(html);
+  window.validationResponse = function(valid){
+    if(!valid) validationCount++;
+    callback(valid);
+  };
+}
 
-                plugins: {
-                    annotation: {
-                        annotations: {
-                            faible: {
-                                type: 'box',
-                                yMin: 0,
-                                yMax: 7,
-                                backgroundColor: 'rgba(255, 0, 0, 0.1)'
-                            },
-                            normal: {
-                                type: 'box',
-                                yMin: 7,
-                                yMax: 13,
-                                backgroundColor: 'rgba(255, 165, 0, 0.1)'
-                            },
-                            important: {
-                                type: 'box',
-                                yMin: 13,
-                                yMax: 27,
-                                backgroundColor: 'rgba(255, 255, 0, 0.1)'
-                            },
-                            tresImportant: {
-                                type: 'box',
-                                yMin: 27,
-                                yMax: 53,
-                                backgroundColor: 'rgba(0, 128, 0, 0.1)'
-                            }
-                        }
-                    }
-                },
+function sortElements(els, kind, callback){
+  var order = [els[0]];
+  var index = 1;
+  function next(){
+    if(index >= els.length){
+      validateOrder(order, kind, function(valid){
+        if(valid){ callback(order); }
+        else { sortElements(els, kind, callback); }
+      });
+      return;
+    }
+    var current = els[index];
+    var position = 0;
+    function compare(){
+      if(position >= order.length){
+        order.push(current);
+        index++;
+        next();
+        return;
+      }
+      var reference = order[position];
+      var question = (LANG==='fr')
+        ? "L'impact de <span class='emphasis'>" + current + "</span> est-il plus important que celui de <span class='emphasis'>" + reference + "</span> ?"
+        : "Is the impact of <span class='emphasis'>" + current + "</span> greater than <span class='emphasis'>" + reference + "</span>?";
+      var html = ""
+        + "<h2 style='color:#007BFF;'>" + t('dacTitle') + " : " + userDecision + "</h2>"
+        + "<h3 class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>"
+        + (kind==='Positive' ? t('ifDo') : t('ifDont')) + "</h3>"
+        + "<p class='" + (kind==='Positive'?'positive-question':'negative-question') + "'>" + question + "</p>"
+        + "<button class='button yes-button' onclick='compareResponse(true)'>" + t('yes') + "</button>"
+        + "<button class='button no-button'  onclick='compareResponse(false)'>" + t('no') + "</button>";
+      questionsDiv.innerHTML = html;
+      updateDefinitionFromText(html);
+    }
+    window.compareResponse = function(higher){
+      if(higher){ order.splice(position, 0, current); index++; next(); }
+      else { position++; compare(); }
+    };
+    compare();
+  }
+  next();
+}
 
-                indexAxis: 'x',
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 53
-                    },
-                    x: {
-                        ticks: { font: { size: 14 } }
-                    }
-                }
-            }
+function calculateResults(){
+  var total = 15;
+  var detailedPositive = [];
+  var detailedNegative = [];
+  var totalPositive = 0, totalNegative = 0;
 
+  for (var i=0;i<positiveOrder.length;i++){
+    if(positiveImpacts[i]){
+      var v = elementsWeights[i];
+      totalPositive += v;
+      detailedPositive.push({element: positiveOrder[i], percentage: Math.round((v/total)*100)});
+    }
+  }
+  for (var j=0;j<negativeOrder.length;j++){
+    if(negativeImpacts[j]){
+      var v2 = elementsWeights[j];
+      totalNegative += v2;
+      detailedNegative.push({element: negativeOrder[j], percentage: Math.round((v2/total)*100)});
+    }
+  }
+  detailedPositive.sort(function(a,b){return b.percentage - a.percentage;});
+  detailedNegative.sort(function(a,b){return b.percentage - a.percentage;});
+
+  var percentPositive = Math.round((totalPositive/total)*100);
+  var percentNegative = Math.round((totalNegative/total)*100);
+  var scorePositive = Math.round((totalPositive/total)*10);
+  var scoreNegative = Math.round((totalNegative/total)*10);
+  var globalScore = Math.round((scorePositive + scoreNegative) / 2);
+
+  var posDetails = detailedPositive.length
+    ? "<div class='precision'>"+t('details')+"</div><ul>" + detailedPositive.map(function(it){return "<li>"+it.element+" : "+it.percentage+"%</li>";}).join("") + "</ul>"
+    : "<p>"+t('none')+"</p>";
+  var negDetails = detailedNegative.length
+    ? "<div class='precision'>"+t('details')+"</div><ul>" + detailedNegative.map(function(it){return "<li>"+it.element+" : "+it.percentage+"%</li>";}).join("") + "</ul>"
+    : "<p>"+t('none')+"</p>";
+
+  resultContentDiv.innerHTML = ""
+    + "<div class='result-header'>"+t('dacTitle')+" :</div>"
+    + "<p style='font-weight:bold; font-size:18px; color:#333;'>"+userDecision+"</p>"
+    + "<div class='empty-space'></div>"
+    + "<div class='result-header'>"+t('overallResult')+"</div>"
+    + "<p class='precision'>"+t('overallResultDesc')+"</p>"
+    + "<p>"+t('globalScore', globalScore)+"</p>"
+    + "<div class='empty-space'></div>"
+    + "<div class='result-header'>"+t('posTable')+"</div>"
+    + "<p class='precision'>"+t('posDesc')+"</p>"
+    + "<p>"+t('posScore', scorePositive, percentPositive)+"</p>"
+    + posDetails
+    + "<div class='empty-space'></div>"
+    + "<div class='result-header'>"+t('negTable')+"</div>"
+    + "<p class='precision'>"+t('negDesc')+"</p>"
+    + "<p>"+t('negScore', scoreNegative, percentNegative)+"</p>"
+    + negDetails
+    + "<div class='empty-space'></div>"
+    + "<p class='emphasis'>"+t('caution')+"</p>"
+    + "<div class='empty-space'></div>"
+    + "<div class='result-header'>"+t('rejTitle')+"</div>"
+    + "<p>"+t('rejDesc')+"</p>"
+    + "<p>"+(LANG==='fr'?'Nombre':'Count')+": "+validationCount+"</p>"
+    + "<div class='result-header'>"+t('posChart')+"</div>"
+    + "<p class='precision'>"+t('posChartDesc')+"</p>"
+    + "<canvas id='positiveChart' width='400' height='300'></canvas>"
+    + "<div class='empty-space'></div>"
+    + "<div class='result-header'>"+t('negChart')+"</div>"
+    + "<p class='precision'>"+t('negChartDesc')+"</p>"
+    + "<canvas id='negativeChart' width='400' height='300'></canvas>"
+    + "<div class='empty-space'></div>";
+
+  document.getElementById('questions').innerHTML = '';
+  var defBox = document.getElementById('definition-box');
+  if (defBox){ defBox.innerHTML = ''; defBox.style.display = 'none'; }
+  resultsDiv.classList.remove('hidden');
+
+  var ctxPos = document.getElementById('positiveChart').getContext('2d');
+  var ctxNeg = document.getElementById('negativeChart').getContext('2d');
+
+  var posLabels = positiveOrder.map(function(el,i){ return !positiveImpacts[i] ? el.charAt(0) : null; }).filter(function(x){return x!==null;});
+  var posData   = positiveOrder.map(function(el,i){ return !positiveImpacts[i] ? Math.round((elementsWeights[i]/15)*100) : null; }).filter(function(x){return x!==null;});
+  var negLabels = negativeOrder.map(function(el,i){ return !negativeImpacts[i] ? el.charAt(0) : null; }).filter(function(x){return x!==null;});
+  var negData   = negativeOrder.map(function(el,i){ return !negativeImpacts[i] ? Math.round((elementsWeights[i]/15)*100) : null; }).filter(function(x){return x!==null;});
+
+  Chart.register(window['chartjs-plugin-annotation']);
+  new Chart(ctxPos, {
+    type:'bar',
+    data:{ labels:posLabels, datasets:[{ label:(LANG==='fr'?'% Impact positif':'% Positive impact'), data:posData, backgroundColor:'#28a745' }]},
+    options:{ plugins:{ annotation:{ annotations:{ faible:{type:'box',yMin:0,yMax:7,backgroundColor:'rgba(255,0,0,.1)'},
+                                            normal:{type:'box',yMin:7,yMax:13,backgroundColor:'rgba(255,165,0,.1)'},
+                                            important:{type:'box',yMin:13,yMax:27,backgroundColor:'rgba(255,255,0,.1)'},
+                                            tresImportant:{type:'box',yMin:27,yMax:53,backgroundColor:'rgba(0,128,0,.1)'} } } },
+              indexAxis:'x', scales:{ y:{beginAtZero:true,max:53}, x:{ticks:{font:{size:14}}} } }
+  });
+
+  Chart.register(window['chartjs-plugin-annotation']);
+  new Chart(ctxNeg, {
+    type:'bar',
+    data:{ labels:negLabels, datasets:[{ label:(LANG==='fr'?'% Impact négatif':'% Negative impact'), data:negData, backgroundColor:'#dc3545' }]},
+    options:{ plugins:{ annotation:{ annotations:{ faible:{type:'box',yMin:0,yMax:7,backgroundColor:'rgba(255,0,0,.1)'},
+                                            normal:{type:'box',yMin:7,yMax:13,backgroundColor:'rgba(255,165,0,.1)'},
+                                            important:{type:'box',yMin:13,yMax:27,backgroundColor:'rgba(255,255,0,.1)'},
+                                            tresImportant:{type:'box',yMin:27,yMax:53,backgroundColor:'rgba(0,128,0,.1)'} } } },
+              indexAxis:'x', scales:{ y:{beginAtZero:true,max:53}, x:{ticks:{font:{size:14}}} } }
+  });
+}
+
+function restart(){ window.location.href = 'https://frankproulx.com'; }
+
+function start(){
+  // Use language-specific element names
+  var els = I18N[LANG].elements.slice(0);
+  sortElements(els, 'Positive', function(order){
+    positiveOrder = order;
+    askImpact('Positive', positiveOrder, function(imp){
+      positiveImpacts = imp;
+      sortElements(els, 'Negative', function(orderN){
+        negativeOrder = orderN;
+        askImpact('Negative', negativeOrder, function(impN){
+          negativeImpacts = impN;
+          calculateResults();
         });
+      });
+    });
+  });
+}
 
-        Chart.register(window['chartjs-plugin-annotation']);
-new Chart(ctxNeg, {
-            type: 'bar',
-            data: {
-                labels: negativeLabels,
-                datasets: [{
-                    label: '% Impact négatif',
-                    data: negativeData,
-                    backgroundColor: '#dc3545'
-                }]
-            },
-            
-            options: {
+function launchCalculator(){
+  var input = document.getElementById("userDecision").value;
+  input = input ? input.trim() : "";
+  userDecision = input || (LANG==='fr' ? "(non précisé)" : "(unspecified)");
+  document.getElementById("welcome-screen").style.display = "none";
+  document.getElementById("main-content").classList.remove("hidden");
+  questionsDiv = document.getElementById('questions');
+  resultsDiv   = document.getElementById('results');
+  resultContentDiv = document.getElementById('result-content');
+  start();
+}
 
-                plugins: {
-                    annotation: {
-                        annotations: {
-                            faible: {
-                                type: 'box',
-                                yMin: 0,
-                                yMax: 7,
-                                backgroundColor: 'rgba(255, 0, 0, 0.1)'
-                            },
-                            normal: {
-                                type: 'box',
-                                yMin: 7,
-                                yMax: 13,
-                                backgroundColor: 'rgba(255, 165, 0, 0.1)'
-                            },
-                            important: {
-                                type: 'box',
-                                yMin: 13,
-                                yMax: 27,
-                                backgroundColor: 'rgba(255, 255, 0, 0.1)'
-                            },
-                            tresImportant: {
-                                type: 'box',
-                                yMin: 27,
-                                yMax: 53,
-                                backgroundColor: 'rgba(0, 128, 0, 0.1)'
-                            }
-                        }
-                    }
-                },
-
-                indexAxis: 'x',
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 53
-                    },
-                    x: {
-                        ticks: { font: { size: 14 } }
-                    }
-                }
-            }
-
-        });
-
-    }
-
-    function restart() {
-    window.location.href = 'https://frankproulx.com';
-        
-    }
-
-    function start() {
-        sortElements(elements, 'Positif', (order) => {
-            positiveOrder = order;
-            askImpact('Positif', positiveOrder, (impacts) => {
-                positiveImpacts = impacts;
-                sortElements(elements, 'Négatif', (order) => {
-                    negativeOrder = order;
-                    askImpact('Négatif', negativeOrder, (impacts) => {
-                        negativeImpacts = impacts;
-                        calculateResults();
-                    });
-                });
-            });
-        });
-    }
-
-    
-
-    function launchCalculator() {
-        const input = document.getElementById("userDecision").value.trim();
-        userDecision = input || "(non précisé)";
-        document.getElementById("welcome-screen").style.display = "none";
-        document.getElementById("main-content").classList.remove("hidden");
-        start();
-    }
-</script>
-</div>
-<script>
-function updateDefinitionFromText(text) {
-  const resultsVisible = !document.getElementById("results").classList.contains("hidden");
-  const box = document.getElementById("definition-box");
-  if (resultsVisible) {
-    if (box) { box.innerHTML = ""; box.style.display = "none"; }
+// ===== Boîte de définitions contextuelles =====
+function updateDefinitionFromText(text){
+  var resultsVisible = !document.getElementById("results").classList.contains("hidden");
+  var box = document.getElementById("definition-box");
+  if (resultsVisible){
+    if (box){ box.innerHTML = ""; box.style.display = "none"; }
     return;
   }
-  const defs = {
-    "Moi": "💭 <strong>Moi (M):</strong> Cette dimension concerne l’individu lui-même. Elle inclut ses émotions, ses pensées, ses besoins, ses désirs, ses valeurs ainsi que ses craintes. C’est l’espace intérieur où l’on prend conscience de son état personnel et de la façon dont il influence ses réactions.",
-    "Autre": "👥 <strong>Autre (A):</strong> Cette dimension s’intéresse aux personnes impliquées dans la situation. Elle tient compte de leurs émotions, de leurs intentions, de leurs comportements et de leur façon de percevoir les choses. L’objectif est de comprendre l’impact que l’autre peut avoir sur soi, et inversement.",
-    "Relation": "🔗 <strong>Relation (R):</strong> Cette dimension met l’accent sur la dynamique entre « Moi » et « Autre ». Elle comprend la qualité de la communication, la confiance mutuelle, les attentes réciproques, les habitudes relationnelles et la manière dont les émotions de chacun façonnent l’interaction.",
-    "Situation": "🌍 <strong>Situation (S):</strong> Cette dimension examine le contexte dans lequel la relation se déroule. Elle prend en compte les éléments extérieurs comme l’environnement, les contraintes, les événements, le stress ou tout autre facteur pouvant influencer les comportements et les émotions des personnes impliquées."
-  };
-  let found = Object.entries(defs).filter(([key]) => text.includes(key)).map(([, v]) => v).join("<br><br>");
-  if (found) {
-    box.innerHTML = found;
+  var defs = I18N[LANG].defs;
+  var out = [];
+  for (var key in defs){
+    if (text.indexOf(key) !== -1){ out.push(defs[key]); }
+  }
+  if (out.length){
+    box.innerHTML = out.join("<br><br>");
     box.style.display = "block";
   } else {
     box.innerHTML = "";
     box.style.display = "none";
   }
 }
+
+// Init langue par défaut
+setLang('fr');
 </script>
-<script>
-function toggleDefinitions() {
-    const defBlock = document.getElementById("mars-definitions");
-    if (defBlock) {
-        defBlock.style.display = defBlock.style.display === "none" ? "block" : "none";
-    }
-}
-</script></body>
+</body>
 </html>
-
-
-
