@@ -231,34 +231,97 @@
       #welcome-screen{ margin:30px auto; padding: 10px }
     }
   
-/* === Minimal VH layout (conservative) — 2025-09-26 === */
-:root{ --topbar-h: 56px; }
+/* === Responsive VH/VW enhancements (ChatGPT, 2025-09-26) === */
+/* We keep original layout intact and only add sizing that adapts to viewport. */
+:root{ --topbar-h: 56px; } /* adjust if your top bar height changes */
 
-/* Welcome screen fills viewport height (accounts for top bar) */
+/* Ensure the main screens adapt to viewport height */
+html, body { height: 100%; }
+
+/* Welcome screen fills remaining viewport height and centers content vertically */
 #welcome-screen{
   min-height: calc(100vh - var(--topbar-h));
   display: grid;
-  align-content: center; /* vertical centering without affecting widths/text alignment */
+  align-content: center;
   padding-block: 6vh;
 }
 
-/* Main content gets a comfortable viewport-based height without changing its inner layout */
+/* Main content section gets a comfortable viewport-based height */
 #main-content{
+  min-height: calc(100vh - var(--topbar-h));
+}
+
+/* Keep the primary container tall enough to feel full-screen on desktops */
+#main-content .container{
   min-height: 72vh;
 }
 
-/* Keep cards responsive on small screens without overriding other rules */
-@media (max-width:600px){
-  #welcome-screen{ padding-block: 5vh; }
-  #main-content{ min-height: 68vh; }
-}
-
-
-/* === Centering fix for decision input === */
+/* Decision input: centered and fluid width that adapts to screen size */
 #userDecision{
   display: block;
   margin: 0 auto;
+  width: clamp(260px, 90vw, 600px);
   text-align: center;
+}
+
+/* Buttons: preserve existing styles, just ensure accessible tap target height */
+.button{
+  min-height: 44px;
+  line-height: 1.2;
+  padding-top: 1.0em;
+  padding-bottom: 1.0em;
+}
+
+/* Canvas & charts remain responsive */
+canvas{
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Mobile tweaks */
+@media (max-width: 600px){
+  #welcome-screen{ padding-block: 5vh; }
+  #main-content .container{ min-height: 68vh; }
+  #userDecision{ width: min(92vw, 560px); }
+}
+
+/* Large desktop tweaks */
+@media (min-width: 1024px){
+  #main-content .container{ min-height: 74vh; }
+}
+
+
+/* === Extra Mobile Friendliness (ChatGPT, 2025-09-26) === */
+html, body{
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Ensure containers shrink nicely on small screens */
+.container{
+  width: 92vw;
+  max-width: 920px;
+}
+
+/* Text input scaling */
+#userDecision{
+  font-size: clamp(14px, 4vw, 18px);
+  padding: 10px;
+}
+
+/* Buttons full-width on very small screens */
+@media (max-width: 480px){
+  .button{
+    display: block;
+    width: 100%;
+    max-width: 92vw;
+    margin: 10px auto;
+    font-size: 1em;
+  }
+  #userDecision{
+    width: 100%;
+    max-width: 92vw;
+  }
 }
 
 </style>
