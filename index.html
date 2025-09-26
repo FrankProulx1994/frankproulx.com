@@ -324,6 +324,71 @@ html, body{
   }
 }
 
+
+/* === No-Zoom Mobile Overrides (ChatGPT, 2025-09-26) === */
+* { box-sizing: border-box; }
+
+/* Prefer dynamic viewport height to avoid URL bar issues */
+#welcome-screen{
+  min-height: calc(100dvh - var(--topbar-h));
+}
+#main-content{
+  min-height: calc(100dvh - var(--topbar-h));
+}
+
+@media (max-width: 600px){
+  html, body{ padding: 0; margin: 0; max-width: 100%; overflow-x: hidden; }
+  .langbar{ padding: 8px 10px; display:flex; gap:8px; flex-wrap: wrap; }
+
+  /* Containers must never exceed viewport width */
+  .container{
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 8px 0 !important;
+    padding: 12px !important;
+    border-radius: 10px;
+  }
+
+  /* Typography scales down to fit small screens without zooming */
+  h1{ font-size: clamp(18px, 6vw, 28px) !important; }
+  h2{ font-size: clamp(16px, 4.8vw, 22px) !important; }
+  h3{ font-size: clamp(15px, 4.2vw, 20px) !important; }
+  p, li, label, span{ font-size: clamp(14px, 3.8vw, 18px) !important; }
+
+  /* Inputs and actions always fit the screen width */
+  input[type="text"], input[type="search"], textarea, select, #userDecision{
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin-left: auto; margin-right: auto;
+  }
+
+  .button, button, .yes-button, .no-button{
+    display: block;
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin: 10px auto !important;
+    white-space: normal;
+    word-wrap: break-word;
+  }
+
+  /* Media and canvases never overflow */
+  img, video, canvas{
+    display:block;
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Reduce vertical whitespace to keep everything visible */
+  #welcome-screen{ padding-block: 4vh !important; }
+  #main-content .container{ min-height: 68vh !important; }
+}
+
+/* Safety: prevent any rogue element from forcing horizontal scroll */
+[class*="container"], [id*="content"], #questions, #results{
+  max-width: 100vw;
+  overflow-wrap: anywhere;
+}
+
 </style>
 </head>
 <body>
