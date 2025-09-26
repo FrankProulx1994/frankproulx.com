@@ -230,7 +230,38 @@
       canvas{ max-width:100% !important; height:auto !important }
       #welcome-screen{ margin:30px auto; padding: 10px }
     }
-  </style>
+  
+/* === Minimal VH layout (conservative) — 2025-09-26 === */
+:root{ --topbar-h: 56px; }
+
+/* Welcome screen fills viewport height (accounts for top bar) */
+#welcome-screen{
+  min-height: calc(100vh - var(--topbar-h));
+  display: grid;
+  align-content: center; /* vertical centering without affecting widths/text alignment */
+  padding-block: 6vh;
+}
+
+/* Main content gets a comfortable viewport-based height without changing its inner layout */
+#main-content{
+  min-height: 72vh;
+}
+
+/* Keep cards responsive on small screens without overriding other rules */
+@media (max-width:600px){
+  #welcome-screen{ padding-block: 5vh; }
+  #main-content{ min-height: 68vh; }
+}
+
+
+/* === Centering fix for decision input === */
+#userDecision{
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+}
+
+</style>
 </head>
 <body>
   <div class="langbar">
@@ -666,3 +697,4 @@ setLang('fr');
 </script>
 </body>
 </html>
+
