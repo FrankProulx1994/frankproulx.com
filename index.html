@@ -108,7 +108,7 @@
       text-transform: uppercase;
       letter-spacing:.4px;
     }
-    header h1{ margin:0; font-size:28px; color:var(--red); }
+    header h1{ margin:0; font-size:28px; color: var(--red); }
     header h2{ margin:10px 0 0; font-size:18px; font-style:italic; color:#cfcfcf; }
     header h3{ margin:5px 0 0; font-size:16px; color:#ff5a5a; }
 
@@ -232,84 +232,58 @@
     }
   
 /* === Responsive VH/VW enhancements (ChatGPT, 2025-09-26) === */
-/* We keep original layout intact and only add sizing that adapts to viewport. */
 :root{ --topbar-h: 56px; } /* adjust if your top bar height changes */
-
-/* Ensure the main screens adapt to viewport height */
 html, body { height: 100%; }
-
-/* Welcome screen fills remaining viewport height and centers content vertically */
 #welcome-screen{
   min-height: calc(100vh - var(--topbar-h));
   display: grid;
   align-content: center;
   padding-block: 6vh;
 }
-
-/* Main content section gets a comfortable viewport-based height */
 #main-content{
   min-height: calc(100vh - var(--topbar-h));
 }
-
-/* Keep the primary container tall enough to feel full-screen on desktops */
 #main-content .container{
   min-height: 72vh;
 }
-
-/* Decision input: centered and fluid width that adapts to screen size */
 #userDecision{
   display: block;
   margin: 0 auto;
   width: clamp(260px, 90vw, 600px);
   text-align: center;
 }
-
-/* Buttons: preserve existing styles, just ensure accessible tap target height */
 .button{
   min-height: 44px;
   line-height: 1.2;
   padding-top: 1.0em;
   padding-bottom: 1.0em;
 }
-
-/* Canvas & charts remain responsive */
 canvas{
   max-width: 100% !important;
   height: auto !important;
 }
-
-/* Mobile tweaks */
 @media (max-width: 600px){
   #welcome-screen{ padding-block: 5vh; }
   #main-content .container{ min-height: 68vh; }
   #userDecision{ width: min(92vw, 560px); }
 }
-
-/* Large desktop tweaks */
 @media (min-width: 1024px){
   #main-content .container{ min-height: 74vh; }
 }
-
 
 /* === Extra Mobile Friendliness (ChatGPT, 2025-09-26) === */
 html, body{
   max-width: 100%;
   overflow-x: hidden;
 }
-
-/* Ensure containers shrink nicely on small screens */
 .container{
   width: 92vw;
   max-width: 920px;
 }
-
-/* Text input scaling */
 #userDecision{
   font-size: clamp(14px, 4vw, 18px);
   padding: 10px;
 }
-
-/* Buttons full-width on very small screens */
 @media (max-width: 480px){
   .button{
     display: block;
@@ -324,23 +298,17 @@ html, body{
   }
 }
 
-
 /* === No-Zoom Mobile Overrides (ChatGPT, 2025-09-26) === */
 * { box-sizing: border-box; }
-
-/* Prefer dynamic viewport height to avoid URL bar issues */
 #welcome-screen{
   min-height: calc(100dvh - var(--topbar-h));
 }
 #main-content{
   min-height: calc(100dvh - var(--topbar-h));
 }
-
 @media (max-width: 600px){
   html, body{ padding: 0; margin: 0; max-width: 100%; overflow-x: hidden; }
   .langbar{ padding: 8px 10px; display:flex; gap:8px; flex-wrap: wrap; }
-
-  /* Containers must never exceed viewport width */
   .container{
     width: 100vw !important;
     max-width: 100vw !important;
@@ -348,20 +316,15 @@ html, body{
     padding: 12px !important;
     border-radius: 10px;
   }
-
-  /* Typography scales down to fit small screens without zooming */
   h1{ font-size: clamp(18px, 6vw, 28px) !important; }
   h2{ font-size: clamp(16px, 4.8vw, 22px) !important; }
   h3{ font-size: clamp(15px, 4.2vw, 20px) !important; }
   p, li, label, span{ font-size: clamp(14px, 3.8vw, 18px) !important; }
-
-  /* Inputs and actions always fit the screen width */
   input[type="text"], input[type="search"], textarea, select, #userDecision{
     width: 100% !important;
     max-width: 100vw !important;
     margin-left: auto; margin-right: auto;
   }
-
   .button, button, .yes-button, .no-button{
     display: block;
     width: 100% !important;
@@ -370,26 +333,46 @@ html, body{
     white-space: normal;
     word-wrap: break-word;
   }
-
-  /* Media and canvases never overflow */
   img, video, canvas{
     display:block;
     max-width: 100% !important;
     height: auto !important;
   }
-
-  /* Reduce vertical whitespace to keep everything visible */
   #welcome-screen{ padding-block: 4vh !important; }
   #main-content .container{ min-height: 68vh !important; }
 }
-
-/* Safety: prevent any rogue element from forcing horizontal scroll */
 [class*="container"], [id*="content"], #questions, #results{
   max-width: 100vw;
   overflow-wrap: anywhere;
 }
 
-</style>
+/* ===== PRINT: show full results ===== */
+@media print{
+  @page{ size:auto; margin:12mm; }
+
+  /* 1) Forcer l’affichage des résultats, masquer l’accueil */
+  #welcome-screen{ display:none !important; }
+  #main-content{ display:block !important; }
+  #results{ display:block !important; }
+  .hidden{ display:block !important; }
+
+  /* 2) Désactiver hauteurs mini/fixed et scroll qui coupent la page */
+  html, body{ height:auto !important; min-height:auto !important; overflow:visible !important; background:#fff !important; color:#000 !important; }
+  #main-content, #main-content .container{ height:auto !important; min-height:auto !important; overflow:visible !important; }
+  body::before, body::after{ display:none !important; }
+
+  /* 3) Enlever ombres/fonds pour un rendu propre */
+  .container{ background:#fff !important; box-shadow:none !important; border:none !important; }
+  header{ background:#fff !important; box-shadow:none !important; color:#000 !important; border-bottom:2px solid #000 !important; }
+  .result-header{ color:#000 !important; border-color:#000 !important; }
+  .precision, .result-content p, ul li, h1, h2, h3{ color:#000 !important; text-shadow:none !important; }
+
+  /* 4) Éviter les coupures au milieu des blocs */
+  header, .container, .result-header, .result-content, .button-container, .langbar, .precision, ul, li, p, h1, h2, h3{
+    break-inside: avoid; page-break-inside: avoid;
+  }
+}
+  </style>
 </head>
 <body>
   <div class="langbar">
@@ -436,7 +419,7 @@ html, body{
   </div>
 
 <script>
-// ===== i18n dictionnaire =====
+/* ===== i18n dictionnaire ===== */
 var I18N = {
   fr: {
     title:'Calculatrice de Réponse Impulsive',
